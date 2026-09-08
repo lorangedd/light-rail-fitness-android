@@ -9,9 +9,9 @@
   const toast = document.getElementById("toast");
   const dialog = document.getElementById("confirm-dialog");
   // 修改时间：2026-09-08 11:45:00 +08:00；目的：使页面显示版本与 Android 版本号和远程清单一致，避免应用把自身误判为可更新版本。
-  // 修改时间：2026-09-08 17:40:00 +08:00；目的：发布所有页面统一小字号布局，避免覆盖已安装包。
-  const APP_VERSION = "1.0.11";
-  const APP_VERSION_CODE = 12;
+  // 修改时间：2026-09-08 18:20:00 +08:00；目的：发布白色底色、知识搜索折叠和备份清空行为更新，避免覆盖已安装包。
+  const APP_VERSION = "1.0.12";
+  const APP_VERSION_CODE = 13;
   // 修改时间：2026-09-08 10:20:00 +08:00；目的：固定唯一版本清单地址，禁止由页面数据或用户输入改变更新检查目标。
   const UPDATE_MANIFEST_URL = "https://raw.githubusercontent.com/lorangedd/light-rail-fitness-android/main/version.json";
   const TRUSTED_RELEASE_PREFIX = "https://github.com/lorangedd/light-rail-fitness-android/releases/download/";
@@ -26,6 +26,8 @@
     reviewCycle: "week",
     expandedRecordId: "",
     expandedReviewId: "",
+    expandedKnowledgeId: "",
+    knowledgeSearch: "",
     workoutMediaOwner: "",
     workoutMediaDraft: [],
     workoutNewMediaKeys: [],
@@ -34,6 +36,8 @@
   const activeMediaUrls = new Set();
   // 修改时间：2026-09-08 16:40:00 +08:00；目的：记录月历滑动起点，支持记录页左滑上月、右滑下月。
   let recordTouchStart = null;
+  // 修改时间：2026-09-08 18:20:00 +08:00；目的：支持主页面之间左右滑动切换，同时避开表单输入和月历手势。
+  let pageTouchStart = null;
   // 修改时间：2026-09-08 09:35:00 +08:00；目的：拆分知识库与设置路由，使迁移、版本和安全功能不再出现在知识页。
   const routeTitles = { today: "目标", workout: "新增训练", records: "训练记录", review: "复盘", knowledge: "知识", settings: "设置" };
 
@@ -403,6 +407,8 @@
   function renderKnowledge() {
     const store = Store.get();
     const item = state.editingKnowledge ? store.knowledge_points.find((point) => point.id === state.editingKnowledge) : null;
+    const keyword = state.knowledgeSearch.trim().toLowerCase();
+    const points = store.knowledge_points.filter((point) => !keyword || [point.title, point.category, point.mistake, point.correction, point.notes].some((value) => String(value || "").toLowerCase().includes(keyword)));
     // 修改时间：2026-09-08 09:40:00 +08:00；目的：知识页已是独立顶级页，移除无效的“返回知识”按钮，编辑取消继续由表单内按钮处理。
     return `<div class="stack">
       <form id="knowledge-form" class="card stack"><div class="card-head"><div><p class="eyebrow">Movement notes</p><h2>${item ? "编辑知识点" : "记录动作纠错"}</h2></div>${item ? `<button type="button" class="btn ghost" data-action="cancel-knowledge">取消</button>` : ""}</div>
@@ -410,15 +416,14 @@
         <div class="field"><label>常见错误</label><textarea class="control" name="mistake" maxlength="1200">${escapeHtml(item?.mistake || "")}</textarea></div><div class="field"><label>纠正方法</label><textarea class="control" name="correction" maxlength="1200">${escapeHtml(item?.correction || "")}</textarea></div><div class="field"><label>补充笔记</label><textarea class="control" name="notes" maxlength="1200">${escapeHtml(item?.notes || "")}</textarea></div>
         <button class="btn full" type="submit">${item ? "更新知识点" : "保存知识点"}</button>
       </form>
-      <section class="card"><div class="card-head"><div><p class="eyebrow">Library</p><h2>知识点</h2></div></div>${store.knowledge_points.length ? store.knowledge_points.map((point) => `<article class="record"><div class="record-top"><div><h3>${escapeHtml(point.title || point.mistake)}</h3><p>${escapeHtml(point.category || "未分类")}</p></div></div>${point.correction ? `<p>${escapeHtml(point.correction)}</p>` : ""}<div class="record-actions"><button class="text-btn" data-action="edit-knowledge" data-id="${escapeHtml(point.id)}">编辑</button><button class="text-btn delete" data-action="delete" data-collection="knowledge_points" data-id="${escapeHtml(point.id)}">删除</button></div></article>`).join("") : `<div class="empty">还没有知识点</div>`}</section>
+      <section class="card knowledge-library"><div class="card-head"><div><p class="eyebrow">Library</p><h2>知识点</h2></div><span class="knowledge-count">${points.length}/${store.knowledge_points.length}</span></div><input class="control knowledge-search" id="knowledge-search" type="search" value="${escapeHtml(state.knowledgeSearch)}" placeholder="搜索标题、分类或关键词" aria-label="搜索知识点">${points.length ? points.map((point) => { const expanded = state.expandedKnowledgeId === point.id; return `<article class="record knowledge-record${expanded ? " expanded" : ""}"><button class="knowledge-title" type="button" data-action="toggle-knowledge" data-id="${escapeHtml(point.id)}"><span>${escapeHtml(point.title || point.mistake)}</span><small>${escapeHtml(point.category || "未分类")} · ${expanded ? "收起" : "点击查看"}</small></button>${expanded ? `<div class="knowledge-detail">${point.mistake ? `<p><b>易错点：</b>${escapeHtml(point.mistake)}</p>` : ""}${point.correction ? `<p><b>正确做法：</b>${escapeHtml(point.correction)}</p>` : ""}${point.notes ? `<p><b>备注：</b>${escapeHtml(point.notes)}</p>` : ""}</div>` : ""}<div class="record-actions"><button class="text-btn" data-action="edit-knowledge" data-id="${escapeHtml(point.id)}">编辑</button><button class="text-btn delete" data-action="delete" data-collection="knowledge_points" data-id="${escapeHtml(point.id)}">删除</button></div></article>`; }).join("") : `<div class="empty">${keyword ? "没有匹配的知识点" : "还没有知识点"}</div>`}</section>
     </div>`;
   }
 
   function renderBackup() {
-    const backup = escapeHtml(JSON.stringify(Store.get(), null, 2));
     return `<div class="stack"><button class="btn ghost" data-nav="settings">← 返回设置</button>
-      <section class="card stack"><div class="card-head"><div><p class="eyebrow">Local only</p><h2>数据备份</h2></div></div><div class="notice">数据仅保存在当前设备的应用沙箱。卸载应用会清除数据，建议定期复制备份文本到你可信任的位置。</div><textarea id="backup-text" class="control backup-box" spellcheck="false">${backup}</textarea><div class="actions"><button class="btn" data-action="copy-backup">复制备份</button><button class="btn secondary" data-action="import-backup">从文本导入</button></div></section>
-      <section class="card stack"><div class="safe-note"><div class="shield">✓</div><p><b>安全边界</b><br>没有云同步、远程脚本、广告或分析 SDK；备份内容也不会自动上传。</p></div><button class="btn danger full" data-action="reset">清空并恢复初始数据</button></section>
+      <section class="card stack"><div class="card-head"><div><p class="eyebrow">Local only</p><h2>数据备份</h2></div></div><div class="notice">数据仅保存在当前设备的应用沙箱。备份框默认留空；点击“复制备份”时才生成当前数据文本。</div><textarea id="backup-text" class="control backup-box" spellcheck="false" placeholder="粘贴小程序或其他设备导出的 JSON 备份"></textarea><div class="actions"><button class="btn" data-action="copy-backup">复制备份</button><button class="btn secondary" data-action="import-backup">从文本导入</button></div></section>
+      <section class="card stack"><div class="safe-note"><div class="shield">✓</div><p><b>安全边界</b><br>没有云同步、远程脚本、广告或分析 SDK；备份内容也不会自动上传。</p></div><button class="btn danger full" data-action="reset">直接清空全部本地数据</button></section>
     </div>`;
   }
 
@@ -459,6 +464,11 @@
     if (event.target.id === "record-date") { state.selectedDate = `${event.target.value}-01`; render(); }
   });
 
+  // 修改时间：2026-09-08 18:20:00 +08:00；目的：知识页搜索框输入时即时按标题、分类和正文关键词筛选。
+  app.addEventListener("input", (event) => {
+    if (event.target.id === "knowledge-search") { state.knowledgeSearch = event.target.value; render(); }
+  });
+
   // 修改时间：2026-09-08 16:40:00 +08:00；目的：将记录页月历手势映射为左滑上月、右滑下月，并忽略垂直滚动。
   app.addEventListener("touchstart", (event) => {
     if (event.target.closest("[data-record-calendar]")) recordTouchStart = { x: event.changedTouches[0].clientX, y: event.changedTouches[0].clientY };
@@ -473,6 +483,24 @@
     const target = new Date(current.getFullYear(), current.getMonth() + (deltaX < 0 ? -1 : 1), 1);
     state.selectedDate = Store.dateString(target);
     render();
+  }, { passive: true });
+
+  // 修改时间：2026-09-08 18:20:00 +08:00；目的：让目标、训练、记录、复盘和知识五个主页面支持左右滑动切换。
+  app.addEventListener("touchstart", (event) => {
+    if (event.target.closest("[data-record-calendar], input, textarea, select, button, .media-grid")) { pageTouchStart = null; return; }
+    pageTouchStart = { x: event.changedTouches[0].clientX, y: event.changedTouches[0].clientY };
+  }, { passive: true });
+  app.addEventListener("touchend", (event) => {
+    if (!pageTouchStart) return;
+    const deltaX = event.changedTouches[0].clientX - pageTouchStart.x;
+    const deltaY = event.changedTouches[0].clientY - pageTouchStart.y;
+    pageTouchStart = null;
+    if (Math.abs(deltaX) < 70 || Math.abs(deltaX) <= Math.abs(deltaY)) return;
+    const routes = ["today", "workout", "records", "review", "knowledge"];
+    const index = routes.indexOf(state.route);
+    if (index < 0) return;
+    const nextIndex = Math.max(0, Math.min(routes.length - 1, index + (deltaX < 0 ? 1 : -1)));
+    if (nextIndex !== index) navigate(routes[nextIndex]);
   }, { passive: true });
 
   app.addEventListener("click", (event) => {
@@ -497,6 +525,7 @@
     const name = action.dataset.action;
     if (name === "toggle-record") { state.expandedRecordId = state.expandedRecordId === action.dataset.id ? "" : action.dataset.id; render(); }
     if (name === "toggle-review") { state.expandedReviewId = state.expandedReviewId === action.dataset.id ? "" : action.dataset.id; render(); }
+    if (name === "toggle-knowledge") { state.expandedKnowledgeId = state.expandedKnowledgeId === action.dataset.id ? "" : action.dataset.id; render(); }
     if (name === "edit-workout") { state.editingWorkout = action.dataset.id; state.workoutMediaOwner = ""; navigate("workout"); }
     if (name === "cancel-workout") { discardWorkoutDraftMedia().finally(() => { state.editingWorkout = ""; state.workoutMediaOwner = ""; state.workoutMediaDraft = []; render(); }); }
     if (name === "review-cycle") { state.reviewCycle = action.dataset.cycle; state.editingReview = ""; render(); }
@@ -530,7 +559,7 @@
       showToast(index >= 0 ? "已取消生理期" : "已设置生理期");
       return;
     }
-    if (name === "reset") confirmAction({ title: "清空所有本地数据？", message: "训练、目标、复盘和知识点都会被清除。请先复制备份。", onConfirm: () => { Store.reset(); render(); showToast("已恢复初始数据"); } });
+    if (name === "reset") confirmAction({ title: "直接清空所有本地数据？", message: "训练、目标、复盘、知识点和生理期标记都会被删除，清空后不会保留初始示例目标。请先复制备份。", onConfirm: async () => { const sessions = Store.get().sessions || []; await Promise.all(sessions.flatMap((session) => (session.media_items || []).map((media) => MediaVault.removeFile(media.storage_key).catch(() => null)))); Store.reset(); render(); showToast("本地数据已清空"); } });
   }
 
   // 修改时间：2026-09-07 19:35:00 +08:00；目的：将用户在 Android 选择的照片或视频写入本地媒体库，并限制每条训练最多三个附件。
@@ -563,8 +592,11 @@
 
   async function copyBackup() {
     const field = document.getElementById("backup-text");
+    // 修改时间：2026-09-08 18:20:00 +08:00；目的：备份框保持空白，只有用户主动复制时才生成当前本地数据。
+    const text = JSON.stringify(Store.get(), null, 2);
+    field.value = text;
     try {
-      await navigator.clipboard.writeText(field.value);
+      await navigator.clipboard.writeText(text);
       showToast("备份已复制");
     } catch (_) {
       field.focus(); field.select();

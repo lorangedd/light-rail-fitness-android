@@ -332,4 +332,27 @@ body { font-size: 14px; }
   .month-day span { font-size: 8px; }
   .update-result, .toast { font-size: 11px; }
 }
+/* 修改时间：2026-09-08 18:20:00 +08:00；目的：统一白色页面底色，并继续缩小记录、复盘字号与知识折叠搜索控件。 */
+html, body, .app-shell, .app-main { background: #fff; }
+.knowledge-search { margin-bottom: 6px; }
+.knowledge-count { color: #8a928c; font-size: 11px; }
+.knowledge-title { display: flex; align-items: center; justify-content: space-between; gap: 10px; width: 100%; padding: 0; border: 0; background: transparent; color: var(--ink); text-align: left; }
+.knowledge-title span { font-weight: 800; }
+.knowledge-title small { flex: 0 0 auto; color: var(--muted); font-size: 11px; font-weight: 600; }
+.knowledge-detail { margin-top: 9px; padding: 10px 11px; border-radius: 9px; background: #f8f8f5; color: #5f6963; font-size: 12px; line-height: 1.55; }
+.knowledge-detail p { margin: 0 0 6px; }
+.knowledge-detail p:last-child { margin-bottom: 0; }
+@media (max-width: 480px) {
+  .calendar-card .card-head, .review-metrics + .card .card-head { margin-bottom: 7px; }
+  .calendar-card .section-title { font-size: 20px; }
+  .calendar-card .month-day { min-height: 66px; }
+  .calendar-card .month-day b { font-size: 13px; }
+  .review-metrics .metric { padding: 8px 7px; }
+  .review-metrics .metric strong { font-size: 18px; }
+  .review-metrics .metric span { font-size: 9px; }
+  .segment button { min-height: 34px; font-size: 12px; }
+  .knowledge-title span { font-size: 13px; }
+  .knowledge-title small { font-size: 10px; }
+  .knowledge-detail { font-size: 11px; }
+}
 .launch-cover.is-hiding { opacity: 0; pointer-events: none; }

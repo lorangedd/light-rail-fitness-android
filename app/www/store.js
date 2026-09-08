@@ -33,6 +33,11 @@
     };
   }
 
+  // 修改时间：2026-09-08 18:20:00 +08:00；目的：提供真正的空数据状态，清空后不再偷偷保留示例目标。
+  function empty() {
+    return { schemaVersion: 1, sessions: [], reviews: [], knowledge_points: [], period_dates: [], okrs: [] };
+  }
+
   function validStore(value) {
     return value && typeof value === "object" && Array.isArray(value.sessions) && Array.isArray(value.okrs) && Array.isArray(value.reviews) && Array.isArray(value.knowledge_points);
   }
@@ -115,5 +120,5 @@
     set(clean);
   }
 
-  window.FitnessStore = Object.freeze({ KEY, id, dateString, get, set, upsert, remove, metrics, importText, reset: () => set(initial()) });
+  window.FitnessStore = Object.freeze({ KEY, id, dateString, get, set, upsert, remove, metrics, importText, reset: () => set(empty()) });
 })();
