@@ -1,10 +1,10 @@
 {
   "schema": 1,
   "packageName": "cn.lightrail.fitnessokr",
-  "versionCode": 6,
-  "versionName": "1.0.5",
-  "apkUrl": "https://github.com/lorangedd/light-rail-fitness-android/releases/download/v1.0.5/light-rail-training-v1.0.5-release.apk",
-  "sha256": "C1392B2ADFCCECED6844C32B5DB00719BF199A08F92384BC4F3A3698774EBC90",
-  "publishedAt": "2026-09-08T10:05:00+08:00",
-  "notes": "知识页与设置页分离；训练附件继续仅保存在本机。"
+  "versionCode": 7,
+  "versionName": "1.0.6",
+  "apkUrl": "https://github.com/lorangedd/light-rail-fitness-android/releases/download/v1.0.6/light-rail-training-v1.0.6-release.apk",
+  "sha256": "048EA56DFB1404632322FC984E3D964143F74FF4754B6F41636A87A8C39BD82A",
+  "publishedAt": "2026-09-08T11:10:00+08:00",
+  "notes": "新增受限 GitHub HTTPS 版本检查与系统下载入口；训练数据继续仅保存在本机。"
 }
