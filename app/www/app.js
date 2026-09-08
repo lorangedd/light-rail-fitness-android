@@ -10,8 +10,9 @@
   const dialog = document.getElementById("confirm-dialog");
   // 修改时间：2026-09-08 11:45:00 +08:00；目的：使页面显示版本与 Android 版本号和远程清单一致，避免应用把自身误判为可更新版本。
   // 修改时间：2026-09-08 18:45:00 +08:00；目的：修正知识搜索连续输入时的焦点保持，避免覆盖已安装包。
-  const APP_VERSION = "1.0.13";
-  const APP_VERSION_CODE = 14;
+  // 修改时间：2026-09-08 19:20:00 +08:00；目的：标记本次页面布局、复盘字段和记录页交互更新版本。
+  const APP_VERSION = "1.0.14";
+  const APP_VERSION_CODE = 15;
   // 修改时间：2026-09-08 10:20:00 +08:00；目的：固定唯一版本清单地址，禁止由页面数据或用户输入改变更新检查目标。
   const UPDATE_MANIFEST_URL = "https://raw.githubusercontent.com/lorangedd/light-rail-fitness-android/main/version.json";
   const TRUSTED_RELEASE_PREFIX = "https://github.com/lorangedd/light-rail-fitness-android/releases/download/";
@@ -189,7 +190,8 @@
     const monthMetrics = Store.metrics(month.start, month.end);
     const active = (cycle, range) => store.okrs.filter((item) => item.status === "active" && item.cycle_type === cycle && item.start_date <= range.end && item.end_date >= range.start);
     // 修改时间：2026-09-08 09:35:00 +08:00；目的：将目标管理入口纳入设置页，避免使用已拆分的旧知识聚合页。
-    const goalBlock = (label, cycle, metrics, goals, accent) => `<section class="card goal-section ${accent}"><div class="goal-heading"><p class="eyebrow">${label}</p><button class="btn outline" data-nav="settings" data-subroute="okr">管理${label}</button></div>${metrics ? `<div class="metric-grid ${metrics.length === 2 ? "two" : ""}">${metrics.map(([value, caption]) => `<div class="metric"><strong>${value}</strong><span>${caption}</span></div>`).join("")}</div>` : ""}${goals.length ? goals.map(renderGoalCard).join("") : `<div class="empty">还没有${label}</div>`}</section>`;
+    // 修改时间：2026-09-08 19:10:00 +08:00；目的：移除首页“管理目标”按钮，改为点击目标标题或统计卡片进入目标管理。
+    const goalBlock = (label, cycle, metrics, goals, accent) => `<section class="card goal-section ${accent}"><button class="goal-heading goal-heading-link" data-nav="settings" data-subroute="okr"><p class="eyebrow">${label}</p><span class="goal-entry" aria-hidden="true">›</span></button>${metrics ? `<div class="metric-grid ${metrics.length === 2 ? "two" : ""} tappable" data-nav="settings" data-subroute="okr">${metrics.map(([value, caption]) => `<div class="metric"><strong>${value}</strong><span>${caption}</span></div>`).join("")}</div>` : ""}${goals.length ? goals.map(renderGoalCard).join("") : `<div class="empty">还没有${label}</div>`}</section>`;
     return `<div class="stack">
       ${goalBlock("周目标", "week", [[weekMetrics.sessions, "本周训练"], [weekMetrics.totalSets, "总组数"]], active("week", week), "blue")}
       ${goalBlock("月度目标", "month", [[monthMetrics.sessions, "本月训练"], [monthMetrics.totalSets, "本月总组数"], [monthMetrics.averageLactate, "平均乳酸"]], active("month", month), "yellow")}
@@ -296,15 +298,15 @@
       const date = Store.dateString(new Date(selected.getFullYear(), selected.getMonth(), day));
       const items = store.sessions.filter((item) => item.date === date);
       const tags = [...new Set(items.map((item) => item.body_part).filter(Boolean))].slice(0, 2);
-      return `<button type="button" class="month-day${date === state.selectedDate ? " selected" : ""}${periodDates.includes(date) ? " period" : ""}" data-date="${date}"><b>${day}</b>${periodDates.includes(date) ? `<em>生理期</em>` : ""}${tags.map((tag) => `<span>${escapeHtml(tag)}</span>`).join("")}</button>`;
+      return `<button type="button" class="month-day${date === state.selectedDate ? " selected" : ""}${periodDates.includes(date) ? " period" : ""}" data-date="${date}"><b>${day}</b>${periodDates.includes(date) ? `<i class="period-dot" aria-label="生理期"></i>` : ""}${tags.map((tag) => `<span>${escapeHtml(tag)}</span>`).join("")}</button>`;
     }).join("");
     return `<div class="stack">
       <section class="card calendar-card" data-record-calendar>
-        <div class="calendar-head"><div><h2 class="section-title">${selected.getFullYear()}年${selected.getMonth() + 1}月 <small>第 ${weekOfMonth(selected)} 周</small></h2><p class="swipe-hint">左滑上月 · 右滑下月</p></div><button class="period-toggle ${periodDates.includes(state.selectedDate) ? "active" : ""}" type="button" data-action="toggle-period">${periodDates.includes(state.selectedDate) ? "已设生理期" : "设置生理期"}</button></div>
+        <div class="calendar-head"><div><h2 class="section-title">${selected.getFullYear()}年${selected.getMonth() + 1}月 <small>第 ${weekOfMonth(selected)} 周</small></h2></div></div>
         <div class="month-grid">${["一", "二", "三", "四", "五", "六", "日"].map((item) => `<div class="weekday">${item}</div>`).join("")}${cells}</div>
       </section>
       <section class="card">
-        <div class="card-head"><div><p class="eyebrow">${escapeHtml(state.selectedDate)}</p><h2>当日训练</h2></div><button class="btn ghost" data-nav="workout">新增</button></div>
+        <div class="card-head"><div><p class="eyebrow">${escapeHtml(state.selectedDate)}</p><h2>当日训练</h2></div><div class="record-head-actions"><button class="period-toggle ${periodDates.includes(state.selectedDate) ? "active" : ""}" type="button" data-action="toggle-period">${periodDates.includes(state.selectedDate) ? "已设生理期" : "设置生理期"}</button><button class="btn ghost" data-nav="workout">新增</button></div></div>
         ${selectedSessions.length ? selectedSessions.map(renderRecord).join("") : `<div class="empty">这一天还没有训练记录</div>`}
       </section>
     </div>`;
@@ -322,30 +324,31 @@
     return `<div class="record-media"><p>照片 / 视频</p><div class="media-grid">${items.map((item) => `<div class="media-item" data-media-key="${escapeHtml(item.storage_key || "")}" data-media-type="${escapeHtml(item.type || "image")}">${item.storage_key ? `<div class="media-loading">正在读取本地附件</div>` : `<div class="media-missing">${escapeHtml(item.migration_notice || "附件未随旧备份导出")}</div>`}</div>`).join("")}</div></div>`;
   }
 
-  // 修改时间：2026-09-07 18:05:00 +08:00；目的：补齐小程序复盘页的五项自动指标和单击查看历史复盘详情的交互。
+  // 修改时间：2026-09-08 19:12:00 +08:00；目的：复盘页按当前周/月筛选历史内容，仅保留三项精简反馈字段。
   function renderReview() {
     const store = Store.get();
     const editing = state.editingReview ? store.reviews.find((item) => item.id === state.editingReview) : null;
     const cycle = editing?.cycle_type || state.reviewCycle;
     const range = editing ? { start: editing.start_date, end: editing.end_date } : rangeOf(cycle);
-    const metrics = Store.metrics(range.start, range.end);
-    return `<div class="stack">
+    const reviews = store.reviews.filter((item) => item.cycle_type === cycle);
+    return `<div class="stack review-page">
       <section class="segment"><button data-action="review-cycle" data-cycle="week" class="${cycle === "week" ? "active" : ""}">周复盘</button><button data-action="review-cycle" data-cycle="month" class="${cycle === "month" ? "active" : ""}">月复盘</button></section>
-      <section class="metric-grid review-metrics"><div class="metric"><strong>${metrics.sessions}</strong><span>训练次数</span></div><div class="metric"><strong>${metrics.completionRate}%</strong><span>完成率</span></div><div class="metric"><strong>${metrics.totalSets}</strong><span>总组数</span></div><div class="metric"><strong>${metrics.totalVolume}</strong><span>总训练量</span></div><div class="metric"><strong>${metrics.averageLactate}</strong><span>平均乳酸</span></div></section>
       <form id="review-form" class="card stack">
-        <div class="card-head"><div><p class="eyebrow">Reflect</p><h2>${editing ? "编辑复盘" : "写下真实反馈"}</h2></div>${editing ? `<button type="button" class="btn ghost" data-action="cancel-review">取消</button>` : ""}</div>
+        <div class="card-head"><div><h2>${editing ? "编辑复盘" : "复盘记录"}</h2></div>${editing ? `<button type="button" class="btn ghost" data-action="cancel-review">取消</button>` : ""}</div>
         <input type="hidden" name="cycleType" value="${cycle}">
+        <input type="hidden" name="planAdjustments" value="${escapeHtml(editing?.plan_adjustments || "")}" aria-hidden="true">
+        <input type="hidden" name="nextFocus" value="${escapeHtml(editing?.next_focus || "")}" aria-hidden="true">
         <div class="form-grid"><div class="field"><label>开始日期</label><input class="control" type="date" name="startDate" value="${range.start}"></div><div class="field"><label>结束日期</label><input class="control" type="date" name="endDate" value="${range.end}"></div></div>
-        ${[["wins", "做得好的地方"], ["problems", "遇到的问题"], ["insights", "新的认识"], ["planAdjustments", "计划调整"], ["nextFocus", "下个周期重点"]].map(([name, label]) => `<div class="field"><label>${label}</label><textarea class="control" name="${name}" maxlength="1500">${escapeHtml(editing?.[name === "planAdjustments" ? "plan_adjustments" : name === "nextFocus" ? "next_focus" : name] || "")}</textarea></div>`).join("")}
+        ${[["wins", "做得好的地方"], ["problems", "遇到的问题"], ["insights", "心得"]].map(([name, label]) => `<div class="field"><label>${label}</label><textarea class="control" name="${name}" maxlength="1500">${escapeHtml(editing?.[name] || "")}</textarea></div>`).join("")}
         <button class="btn full" type="submit">${editing ? "更新复盘" : "保存复盘"}</button>
       </form>
-      <section class="card"><div class="card-head"><div><p class="eyebrow">历史复盘</p><h2>单击查看详情</h2></div></div>${store.reviews.length ? store.reviews.map(renderReviewRecord).join("") : `<div class="empty">还没有复盘记录</div>`}</section>
+      <section class="card"><div class="card-head"><div><p class="eyebrow">历史复盘</p><h2>${cycle === "week" ? "周复盘" : "月复盘"}</h2></div></div>${reviews.length ? reviews.map(renderReviewRecord).join("") : `<div class="empty">还没有${cycle === "week" ? "周" : "月"}复盘记录</div>`}</section>
     </div>`;
   }
 
   function renderReviewRecord(item) {
     const expanded = state.expandedReviewId === item.id;
-    return `<article class="record tappable${expanded ? " expanded" : ""}" data-action="toggle-review" data-id="${escapeHtml(item.id)}"><div class="record-top"><div><h3>${item.cycle_type === "week" ? "周复盘" : "月复盘"} · ${escapeHtml(item.start_date)} ~ ${escapeHtml(item.end_date)}</h3><p>训练 ${item.metrics_json?.sessions ?? 0} 次 · 完成率 ${item.metrics_json?.completionRate ?? 0}% · 平均乳酸 ${item.metrics_json?.averageLactate ?? 0}</p></div></div>${expanded ? `<div class="record-detail">${item.wins ? `<p>收获：${escapeHtml(item.wins)}</p>` : ""}${item.problems ? `<p>问题：${escapeHtml(item.problems)}</p>` : ""}${item.insights ? `<p>心得：${escapeHtml(item.insights)}</p>` : ""}${item.plan_adjustments ? `<p>调整：${escapeHtml(item.plan_adjustments)}</p>` : ""}${item.next_focus ? `<p>重点：${escapeHtml(item.next_focus)}</p>` : ""}<div class="record-actions"><button class="text-btn" data-action="edit-review" data-id="${escapeHtml(item.id)}">编辑</button><button class="text-btn delete" data-action="delete" data-collection="reviews" data-id="${escapeHtml(item.id)}">删除</button></div></div>` : ""}</article>`;
+    return `<article class="record tappable${expanded ? " expanded" : ""}" data-action="toggle-review" data-id="${escapeHtml(item.id)}"><div class="record-top"><div><h3>${item.cycle_type === "week" ? "周复盘" : "月复盘"} · ${escapeHtml(item.start_date)} ~ ${escapeHtml(item.end_date)}</h3><p>训练 ${item.metrics_json?.sessions ?? 0} 次</p></div></div>${expanded ? `<div class="record-detail">${item.wins ? `<p>收获：${escapeHtml(item.wins)}</p>` : ""}${item.problems ? `<p>问题：${escapeHtml(item.problems)}</p>` : ""}${item.insights ? `<p>心得：${escapeHtml(item.insights)}</p>` : ""}<div class="record-actions"><button class="text-btn" data-action="edit-review" data-id="${escapeHtml(item.id)}">编辑</button><button class="text-btn delete" data-action="delete" data-collection="reviews" data-id="${escapeHtml(item.id)}">删除</button></div></div>` : ""}</article>`;
   }
 
   // 修改时间：2026-09-08 09:35:00 +08:00；目的：集中承载应用设置，把数据迁移、版本检查、目标管理和离线安全说明与知识库分离。
@@ -416,7 +419,7 @@
         <div class="field"><label>常见错误</label><textarea class="control" name="mistake" maxlength="1200">${escapeHtml(item?.mistake || "")}</textarea></div><div class="field"><label>纠正方法</label><textarea class="control" name="correction" maxlength="1200">${escapeHtml(item?.correction || "")}</textarea></div><div class="field"><label>补充笔记</label><textarea class="control" name="notes" maxlength="1200">${escapeHtml(item?.notes || "")}</textarea></div>
         <button class="btn full" type="submit">${item ? "更新知识点" : "保存知识点"}</button>
       </form>
-      <section class="card knowledge-library"><div class="card-head"><div><p class="eyebrow">Library</p><h2>知识点</h2></div><span class="knowledge-count">${points.length}/${store.knowledge_points.length}</span></div><input class="control knowledge-search" id="knowledge-search" type="search" value="${escapeHtml(state.knowledgeSearch)}" placeholder="搜索标题、分类或关键词" aria-label="搜索知识点">${points.length ? points.map((point) => { const expanded = state.expandedKnowledgeId === point.id; return `<article class="record knowledge-record${expanded ? " expanded" : ""}"><button class="knowledge-title" type="button" data-action="toggle-knowledge" data-id="${escapeHtml(point.id)}"><span>${escapeHtml(point.title || point.mistake)}</span><small>${escapeHtml(point.category || "未分类")} · ${expanded ? "收起" : "点击查看"}</small></button>${expanded ? `<div class="knowledge-detail">${point.mistake ? `<p><b>易错点：</b>${escapeHtml(point.mistake)}</p>` : ""}${point.correction ? `<p><b>正确做法：</b>${escapeHtml(point.correction)}</p>` : ""}${point.notes ? `<p><b>备注：</b>${escapeHtml(point.notes)}</p>` : ""}</div>` : ""}<div class="record-actions"><button class="text-btn" data-action="edit-knowledge" data-id="${escapeHtml(point.id)}">编辑</button><button class="text-btn delete" data-action="delete" data-collection="knowledge_points" data-id="${escapeHtml(point.id)}">删除</button></div></article>`; }).join("") : `<div class="empty">${keyword ? "没有匹配的知识点" : "还没有知识点"}</div>`}</section>
+      <section class="card knowledge-library"><div class="card-head"><div><p class="eyebrow">Library</p><h2>知识点</h2></div><span class="knowledge-count">${points.length}/${store.knowledge_points.length}</span></div><input class="control knowledge-search" id="knowledge-search" type="search" value="${escapeHtml(state.knowledgeSearch)}" placeholder="搜索标题、分类或关键词" aria-label="搜索知识点">${points.length ? points.map((point) => { const expanded = state.expandedKnowledgeId === point.id; return `<article class="record knowledge-record${expanded ? " expanded" : ""}"><button class="knowledge-title" type="button" data-action="toggle-knowledge" data-id="${escapeHtml(point.id)}"><span>${escapeHtml(point.title || point.mistake)}</span><small>${escapeHtml(point.category || "未分类")} · ${expanded ? "收起" : "点击查看"}</small></button>${expanded ? `<div class="knowledge-detail">${point.mistake ? `<p><b>易错点：</b>${escapeHtml(point.mistake)}</p>` : ""}${point.correction ? `<p><b>正确做法：</b>${escapeHtml(point.correction)}</p>` : ""}${point.notes ? `<p><b>备注：</b>${escapeHtml(point.notes)}</p>` : ""}</div><div class="record-actions"><button class="text-btn" data-action="edit-knowledge" data-id="${escapeHtml(point.id)}">编辑</button><button class="text-btn delete" data-action="delete" data-collection="knowledge_points" data-id="${escapeHtml(point.id)}">删除</button></div>` : ""}</article>`; }).join("") : `<div class="empty">${keyword ? "没有匹配的知识点" : "还没有知识点"}</div>`}</section>
     </div>`;
   }
 

@@ -32,8 +32,9 @@ android {
         // 修改时间：2026-09-07 19:05:00 +08:00；目的：首页鼓励图和本地版本检查入口更新后递增版本，保证设备可以继续覆盖安装。
         // 修改时间：2026-09-07 19:35:00 +08:00；目的：媒体本地存储和上半部分启动封面更新后递增版本，保证设备可以继续覆盖安装。
         // 修改时间：2026-09-08 18:45:00 +08:00；目的：发布知识搜索焦点保持修正版。
-        versionCode 14
-        versionName "1.0.13"
+        // 修改时间：2026-09-08 19:20:00 +08:00；目的：让 Android 原生版本号与网页版本检查保持一致。
+        versionCode 15
+        versionName "1.0.14"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.

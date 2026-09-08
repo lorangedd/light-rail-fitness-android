@@ -5,7 +5,8 @@
   --muted: #6e7873;
   --paper: #f4f1e9;
   --paper-deep: #e8e3d8;
-  --card: #fffdf8;
+  /* 修改时间：2026-09-08 19:30:00 +08:00；目的：将非目标页卡片底色统一为纯白，同时保留目标页统计块的专属浅色强调。 */
+  --card: #fff;
   --green: #18392e;
   --green-2: #2d5a49;
   --lime: #c8d96f;
@@ -356,3 +357,39 @@ html, body, .app-shell, .app-main { background: #fff; }
   .knowledge-detail { font-size: 11px; }
 }
 .launch-cover.is-hiding { opacity: 0; pointer-events: none; }
+
+/* 修改时间：2026-09-08 19:15:00 +08:00；目的：让首页目标区域改为点击进入、统计块边框透明，并将记录页生理期标记和操作区排布为紧凑移动端样式。 */
+.goal-heading-link { display: flex; align-items: center; justify-content: space-between; width: 100%; padding: 0; border: 0; background: transparent; color: inherit; text-align: left; cursor: pointer; }
+.goal-heading-link .goal-entry { color: var(--muted); font-size: 22px; line-height: 1; }
+.goal-section .metric { border-color: transparent; }
+.record-head-actions { display: flex; align-items: center; justify-content: flex-end; gap: 6px; flex-wrap: wrap; }
+.period-dot { display: block; width: 6px; height: 6px; margin: 3px auto 0; border-radius: 50%; background: #d94b5a; }
+.month-day.selected .period-dot { background: #ffb2ba; }
+.month-day.period em { display: none; }
+.calendar-card { padding: 13px 14px; }
+.calendar-card .month-grid { gap: 2px; }
+.calendar-card .month-day { min-height: 58px; padding: 4px 1px; }
+.review-page { gap: 10px; }
+.review-page .card { padding: 13px 14px; }
+.review-page .card-head { margin-bottom: 8px; }
+.review-page .field { gap: 4px; }
+.review-page .field label { font-size: 10px; }
+.review-page .control { min-height: 38px; padding: 8px 10px; font-size: 12px; }
+.review-page textarea.control { min-height: 70px; }
+.review-page .record { padding: 9px 0; }
+.review-page .record h3 { font-size: 12px; }
+.review-page .record p, .review-page .record-detail p { font-size: 10px; }
+@media (max-width: 480px) {
+  .record-head-actions { gap: 4px; }
+  .record-head-actions .period-toggle { min-height: 30px; padding-inline: 8px; font-size: 10px; }
+  .record-head-actions .btn.ghost { min-height: 30px; padding-inline: 9px; }
+  .calendar-card { padding: 10px 11px; }
+  .calendar-card .month-day { min-height: 52px; }
+  .calendar-card .month-day b { font-size: 12px; }
+  .calendar-card .month-day span { font-size: 7px; }
+  .review-page { gap: 10px; }
+  .review-page .card { padding: 11px 12px; }
+  .review-page .card-head h2 { font-size: 16px; }
+  .review-page .control { min-height: 35px; font-size: 11px; }
+  .review-page textarea.control { min-height: 62px; }
+}
