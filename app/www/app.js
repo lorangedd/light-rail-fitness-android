@@ -352,7 +352,8 @@
         <button class="settings-row" data-nav="settings" data-subroute="okr"><span class="settings-glyph">◎</span><span><b>目标 OKR</b><small>${store.okrs.length} 个周、月、年度计划</small></span><i>›</i></button>
       </section>
       <section class="card version-card"><p class="eyebrow">版本更新</p><h2>当前版本 ${APP_VERSION}</h2><p>仅在你点击时读取官方版本清单；不会上传训练数据。更新包会交给系统浏览器下载和确认安装。</p><button class="btn secondary" data-action="check-update" ${state.updateState.status === "checking" ? "disabled" : ""}>${state.updateState.status === "checking" ? "正在检查…" : "检查版本更新"}</button>${renderUpdateState()}</section>
-      <section class="card safe-note"><div class="shield">✓</div><p><b>离线设计</b><br>训练数据仅保存在 Android 应用沙箱；不请求联网、定位、通讯录、短信或麦克风权限。</p></section>
+      <!-- 修改时间：2026-09-08 11:20:00 +08:00；目的：如实说明仅用户主动版本检查会联网，避免将训练数据本地存储误表述为完全无网络能力。 -->
+      <section class="card safe-note"><div class="shield">✓</div><p><b>本地优先</b><br>训练数据仅保存在 Android 应用沙箱；除你主动检查版本外，不连接网络，也不请求定位、通讯录、短信或麦克风权限。</p></section>
     </div>`;
   }
 
