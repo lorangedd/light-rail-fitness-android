@@ -9,8 +9,9 @@
   const toast = document.getElementById("toast");
   const dialog = document.getElementById("confirm-dialog");
   // 修改时间：2026-09-08 11:45:00 +08:00；目的：使页面显示版本与 Android 版本号和远程清单一致，避免应用把自身误判为可更新版本。
-  const APP_VERSION = "1.0.8";
-  const APP_VERSION_CODE = 9;
+  // 修改时间：2026-09-08 16:45:00 +08:00；目的：为月历手势、历史目标与生理期迁移构建新版本，避免覆盖已安装包。
+  const APP_VERSION = "1.0.9";
+  const APP_VERSION_CODE = 10;
   // 修改时间：2026-09-08 10:20:00 +08:00；目的：固定唯一版本清单地址，禁止由页面数据或用户输入改变更新检查目标。
   const UPDATE_MANIFEST_URL = "https://raw.githubusercontent.com/lorangedd/light-rail-fitness-android/main/version.json";
   const TRUSTED_RELEASE_PREFIX = "https://github.com/lorangedd/light-rail-fitness-android/releases/download/";
@@ -31,6 +32,8 @@
     updateState: { status: "idle", manifest: null, message: "" }
   };
   const activeMediaUrls = new Set();
+  // 修改时间：2026-09-08 16:40:00 +08:00；目的：记录月历滑动起点，支持记录页左滑上月、右滑下月。
+  let recordTouchStart = null;
   // 修改时间：2026-09-08 09:35:00 +08:00；目的：拆分知识库与设置路由，使迁移、版本和安全功能不再出现在知识页。
   const routeTitles = { today: "目标", workout: "新增训练", records: "训练记录", review: "复盘", knowledge: "知识", settings: "设置" };
 
@@ -136,7 +139,7 @@
     activeMediaUrls.forEach((url) => URL.revokeObjectURL(url));
     activeMediaUrls.clear();
     // 修改时间：2026-09-08 09:35:00 +08:00；目的：为设置内的目标管理和数据与安全子页显示准确标题，知识页始终保持知识库语义。
-    title.textContent = state.route === "settings" && state.subroute !== "menu" ? ({ okr: "目标管理", backup: "数据与安全" }[state.subroute]) : routeTitles[state.route];
+    title.textContent = state.route === "settings" && state.subroute !== "menu" ? ({ okr: "目标管理", "okr-history": "历史目标", backup: "数据与安全" }[state.subroute]) : routeTitles[state.route];
     if (state.route === "today") app.innerHTML = renderToday();
     if (state.route === "workout") app.innerHTML = renderWorkout();
     if (state.route === "records") app.innerHTML = renderRecords();
@@ -282,17 +285,18 @@
     const first = new Date(selected.getFullYear(), selected.getMonth(), 1);
     const lastDay = new Date(selected.getFullYear(), selected.getMonth() + 1, 0).getDate();
     const leading = (first.getDay() + 6) % 7;
+    const periodDates = Array.isArray(store.period_dates) ? store.period_dates : [];
     const cells = Array.from({ length: leading + lastDay }, (_, index) => {
       if (index < leading) return `<div class="month-day blank"></div>`;
       const day = index - leading + 1;
       const date = Store.dateString(new Date(selected.getFullYear(), selected.getMonth(), day));
       const items = store.sessions.filter((item) => item.date === date);
       const tags = [...new Set(items.map((item) => item.body_part).filter(Boolean))].slice(0, 2);
-      return `<button type="button" class="month-day${date === state.selectedDate ? " selected" : ""}" data-date="${date}"><b>${day}</b>${tags.map((tag) => `<span>${escapeHtml(tag)}</span>`).join("")}</button>`;
+      return `<button type="button" class="month-day${date === state.selectedDate ? " selected" : ""}${periodDates.includes(date) ? " period" : ""}" data-date="${date}"><b>${day}</b>${periodDates.includes(date) ? `<em>生理期</em>` : ""}${tags.map((tag) => `<span>${escapeHtml(tag)}</span>`).join("")}</button>`;
     }).join("");
     return `<div class="stack">
-      <section class="card">
-        <div class="calendar-head"><div><h2 class="section-title">${selected.getFullYear()}年${selected.getMonth() + 1}月 <small>第 ${weekOfMonth(selected)} 周</small></h2></div><input id="record-date" class="control" type="month" value="${state.selectedDate.slice(0, 7)}"></div>
+      <section class="card calendar-card" data-record-calendar>
+        <div class="calendar-head"><div><h2 class="section-title">${selected.getFullYear()}年${selected.getMonth() + 1}月 <small>第 ${weekOfMonth(selected)} 周</small></h2><p class="swipe-hint">左滑上月 · 右滑下月</p></div><button class="period-toggle ${periodDates.includes(state.selectedDate) ? "active" : ""}" type="button" data-action="toggle-period">${periodDates.includes(state.selectedDate) ? "已设生理期" : "设置生理期"}</button></div>
         <div class="month-grid">${["一", "二", "三", "四", "五", "六", "日"].map((item) => `<div class="weekday">${item}</div>`).join("")}${cells}</div>
       </section>
       <section class="card">
@@ -344,12 +348,14 @@
   function renderSettings() {
     if (state.subroute === "okr") return renderOkrManager();
     if (state.subroute === "backup") return renderBackup();
+    if (state.subroute === "okr-history") return renderOkrHistory();
     const store = Store.get();
     return `<div class="stack">
       <section class="card settings-intro"><p class="eyebrow">Settings</p><h2>你的数据，你做主</h2><p>管理本地备份、迁移与应用信息；这些操作不会自动联网。</p></section>
       <section class="card settings-list" aria-label="设置选项">
         <button class="settings-row" data-nav="settings" data-subroute="backup"><span class="settings-glyph">⇄</span><span><b>数据与安全</b><small>备份、导入、重置与本地存储说明</small></span><i>›</i></button>
         <button class="settings-row" data-nav="settings" data-subroute="okr"><span class="settings-glyph">◎</span><span><b>目标 OKR</b><small>${store.okrs.length} 个周、月、年度计划</small></span><i>›</i></button>
+        <button class="settings-row" data-nav="settings" data-subroute="okr-history"><span class="settings-glyph">↺</span><span><b>历史目标</b><small>查看已结束或已归档的目标</small></span><i>›</i></button>
       </section>
       <section class="card version-card"><p class="eyebrow">版本更新</p><h2>当前版本 ${APP_VERSION}</h2><p>仅在你点击时读取官方版本清单；不会上传训练数据。更新包会交给系统浏览器下载和确认安装。</p><button class="btn secondary" data-action="check-update" ${state.updateState.status === "checking" ? "disabled" : ""}>${state.updateState.status === "checking" ? "正在检查…" : "检查版本更新"}</button>${renderUpdateState()}</section>
       <!-- 修改时间：2026-09-08 11:20:00 +08:00；目的：如实说明仅用户主动版本检查会联网，避免将训练数据本地存储误表述为完全无网络能力。 -->
@@ -385,6 +391,13 @@
       </form>
       <section class="card"><div class="card-head"><div><p class="eyebrow">All cycles</p><h2>全部目标</h2></div></div>${store.okrs.length ? store.okrs.map((okr) => `<article class="record"><div class="record-top"><div><h3>${escapeHtml(okr.objective)}</h3><p>${escapeHtml(okr.start_date)} — ${escapeHtml(okr.end_date)}</p></div><span class="tag">${okr.cycle_type}</span></div><div class="record-actions"><button class="text-btn" data-action="edit-okr" data-id="${escapeHtml(okr.id)}">编辑</button><button class="text-btn delete" data-action="delete" data-collection="okrs" data-id="${escapeHtml(okr.id)}">删除</button></div></article>`).join("") : `<div class="empty">还没有目标</div>`}</section>
     </div>`;
+  }
+
+  // 修改时间：2026-09-08 16:40:00 +08:00；目的：提供独立历史目标入口，避免历史计划和新增目标混在同一操作区。
+  function renderOkrHistory() {
+    const today = Store.dateString();
+    const history = Store.get().okrs.filter((okr) => okr.status !== "active" || okr.end_date < today);
+    return `<div class="stack"><button class="btn ghost" data-nav="settings">← 返回设置</button><section class="card"><div class="card-head"><div><p class="eyebrow">Archived objectives</p><h2>历史目标</h2></div><button class="btn outline" data-nav="settings" data-subroute="okr">目标管理</button></div>${history.length ? history.map((okr) => `<article class="record"><div class="record-top"><div><h3>${escapeHtml(okr.objective)}</h3><p>${escapeHtml(okr.start_date)} — ${escapeHtml(okr.end_date)}</p></div><span class="tag">${escapeHtml(okr.cycle_type)}</span></div><div class="record-actions"><button class="text-btn" data-action="edit-okr" data-id="${escapeHtml(okr.id)}">编辑</button></div></article>`).join("") : `<div class="empty">还没有历史目标</div>`}</section></div>`;
   }
 
   function renderKnowledge() {
@@ -446,6 +459,22 @@
     if (event.target.id === "record-date") { state.selectedDate = `${event.target.value}-01`; render(); }
   });
 
+  // 修改时间：2026-09-08 16:40:00 +08:00；目的：将记录页月历手势映射为左滑上月、右滑下月，并忽略垂直滚动。
+  app.addEventListener("touchstart", (event) => {
+    if (event.target.closest("[data-record-calendar]")) recordTouchStart = { x: event.changedTouches[0].clientX, y: event.changedTouches[0].clientY };
+  }, { passive: true });
+  app.addEventListener("touchend", (event) => {
+    if (!recordTouchStart || !event.target.closest("[data-record-calendar]")) return;
+    const deltaX = event.changedTouches[0].clientX - recordTouchStart.x;
+    const deltaY = event.changedTouches[0].clientY - recordTouchStart.y;
+    recordTouchStart = null;
+    if (Math.abs(deltaX) < 60 || Math.abs(deltaX) <= Math.abs(deltaY)) return;
+    const current = parseDate(state.selectedDate);
+    const target = new Date(current.getFullYear(), current.getMonth() + (deltaX < 0 ? -1 : 1), 1);
+    state.selectedDate = Store.dateString(target);
+    render();
+  }, { passive: true });
+
   app.addEventListener("click", (event) => {
     const nav = event.target.closest("[data-nav]");
     if (nav) { navigate(nav.dataset.nav, nav.dataset.subroute || "menu"); return; }
@@ -473,7 +502,7 @@
     if (name === "review-cycle") { state.reviewCycle = action.dataset.cycle; state.editingReview = ""; render(); }
     if (name === "edit-review") { state.editingReview = action.dataset.id; render(); }
     if (name === "cancel-review") { state.editingReview = ""; render(); }
-    if (name === "edit-okr") { state.editingOkr = action.dataset.id; render(); }
+    if (name === "edit-okr") { state.editingOkr = action.dataset.id; state.subroute = "okr"; render(); }
     if (name === "cancel-okr") { state.editingOkr = ""; render(); }
     if (name === "edit-knowledge") { state.editingKnowledge = action.dataset.id; render(); }
     if (name === "cancel-knowledge") { state.editingKnowledge = ""; render(); }
@@ -491,6 +520,16 @@
     // 修改时间：2026-09-08 10:20:00 +08:00；目的：仅在用户主动操作时检查固定 GitHub 版本清单，下载入口只接受已校验的新版本。
     if (name === "check-update") { checkForUpdate(); return; }
     if (name === "open-update-download") { openVerifiedUpdateDownload(); return; }
+    if (name === "toggle-period") {
+      const store = Store.get();
+      const dates = Array.isArray(store.period_dates) ? store.period_dates.slice() : [];
+      const index = dates.indexOf(state.selectedDate);
+      if (index >= 0) dates.splice(index, 1); else dates.push(state.selectedDate);
+      Store.set({ ...store, period_dates: dates.sort() });
+      render();
+      showToast(index >= 0 ? "已取消生理期" : "已设置生理期");
+      return;
+    }
     if (name === "reset") confirmAction({ title: "清空所有本地数据？", message: "训练、目标、复盘和知识点都会被清除。请先复制备份。", onConfirm: () => { Store.reset(); render(); showToast("已恢复初始数据"); } });
   }
 

@@ -230,6 +230,17 @@ textarea.control { min-height: 94px; resize: vertical; line-height: 1.55; }
 .progress::-webkit-progress-value { border-radius: 999px; background: var(--lime); }
 .calendar-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
 .calendar-head input { width: auto; min-height: 40px; }
+/* 修改时间：2026-09-08 16:40:00 +08:00；目的：以手势提示取代月份选择器，并让生理期标记在月历上清晰可见。 */
+.calendar-card { touch-action: pan-y; }
+.swipe-hint { margin: 5px 0 0; color: #8a928c; font-size: 11px; }
+.period-toggle { min-height: 36px; padding: 0 11px; border: 1px solid #e4a1aa; border-radius: 999px; background: #fff7f8; color: #a84d5a; font-size: 11px; font-weight: 800; }
+.period-toggle.active { background: #f9dce1; }
+.month-day.period em { display: block; margin-top: 2px; color: #b34f5e; font-size: 8px; font-style: normal; line-height: 1; }
+/* 修改时间：2026-09-08 16:40:00 +08:00；目的：整体字号下调一级，降低小屏 Android 页面拥挤度，同时保留按钮可读性。 */
+body { font-size: 14px; }
+.card-head h2, .section-title { font-size: 19px; }
+.goal-card { font-size: 15px; }
+.app-header h1 { font-size: 23px; }
 .week-strip { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
 .weekday, .day { text-align: center; font-size: 11px; }
 .weekday { padding: 5px 0; color: var(--muted); font-weight: 700; }

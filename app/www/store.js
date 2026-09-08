@@ -19,8 +19,9 @@
   function initial() {
     const year = new Date().getFullYear();
     return {
+      // 修改时间：2026-09-08 16:40:00 +08:00；目的：为双端数据迁移保存生理期日期，并兼容旧备份。
       schemaVersion: 1,
-      sessions: [], reviews: [], knowledge_points: [],
+      sessions: [], reviews: [], knowledge_points: [], period_dates: [],
       okrs: [{
         id: id("okr"), cycle_type: "year", objective: "建立稳定训练节奏", status: "active",
         start_date: `${year}-01-01`, end_date: `${year}-12-31`,
@@ -107,7 +108,9 @@
       sessions: parsed.sessions.slice(0, 10000).map(normalizeSession),
       okrs: parsed.okrs.slice(0, 1000),
       reviews: parsed.reviews.slice(0, 5000),
-      knowledge_points: parsed.knowledge_points.slice(0, 5000)
+      knowledge_points: parsed.knowledge_points.slice(0, 5000),
+      // 修改时间：2026-09-08 16:40:00 +08:00；目的：导入小程序迁移包时恢复生理期标记，旧包缺失字段则使用空数组。
+      period_dates: Array.isArray(parsed.period_dates) ? parsed.period_dates.filter((date) => /^\d{4}-\d{2}-\d{2}$/.test(date)).slice(0, 1000) : []
     };
     set(clean);
   }
