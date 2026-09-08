@@ -31,9 +31,9 @@ android {
         // 修改时间：2026-09-07 18:46:00 +08:00；目的：封面更新后递增版本，允许设备将 1.0.1 无缝升级到包含启动封面的 1.0.2。
         // 修改时间：2026-09-07 19:05:00 +08:00；目的：首页鼓励图和本地版本检查入口更新后递增版本，保证设备可以继续覆盖安装。
         // 修改时间：2026-09-07 19:35:00 +08:00；目的：媒体本地存储和上半部分启动封面更新后递增版本，保证设备可以继续覆盖安装。
-        // 修改时间：2026-09-08 16:45:00 +08:00；目的：发布月历手势、历史目标、生理期迁移和新图标版本。
-        versionCode 10
-        versionName "1.0.9"
+        // 修改时间：2026-09-08 17:40:00 +08:00；目的：发布所有页面统一小字号布局版本。
+        versionCode 12
+        versionName "1.0.11"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.

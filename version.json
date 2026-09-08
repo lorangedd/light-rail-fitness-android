@@ -1,10 +1,10 @@
 {
   "schema": 1,
   "packageName": "cn.lightrail.fitnessokr",
-  "versionCode": 10,
-  "versionName": "1.0.9",
-  "apkUrl": "https://github.com/lorangedd/light-rail-fitness-android/releases/download/v1.0.9/light-rail-training-v1.0.9-release.apk",
-  "sha256": "F53DC8163EF8808B997BF147F7E8DF89D6243ED0958AAB06D042CAEB88D90DE2",
-  "publishedAt": "2026-09-08T16:55:00+08:00",
-  "notes": "记录页支持左右滑动切换月份和设置生理期；新增历史目标入口与迁移字段；更新应用图标。"
+  "versionCode": 12,
+  "versionName": "1.0.11",
+  "apkUrl": "https://github.com/lorangedd/light-rail-fitness-android/releases/download/v1.0.11/light-rail-training-v1.0.11-release.apk",
+  "sha256": "1219B5614809D02E9AB25D91AD054978896EF75E042431B50AE594FFD86B18DA",
+  "publishedAt": "2026-09-08T17:55:00+08:00",
+  "notes": "统一训练、记录、复盘、知识和设置页面字号；首页目标卡片紧凑显示，月度目标无需下滑即可看到。"
 }

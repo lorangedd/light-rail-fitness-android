@@ -241,6 +241,23 @@ body { font-size: 14px; }
 .card-head h2, .section-title { font-size: 19px; }
 .goal-card { font-size: 15px; }
 .app-header h1 { font-size: 23px; }
+/* 修改时间：2026-09-08 17:25:00 +08:00；目的：压缩首页首屏目标布局，让月度目标在 390×844 设备上无需下滑即可看到，同时把字号再下调一级。 */
+@media (max-width: 480px) {
+  .app-main { padding-top: 8px; }
+  .stack { gap: 8px; }
+  .goal-section { padding: 12px 14px; }
+  .goal-heading { gap: 8px; margin-bottom: 8px; }
+  .goal-heading .eyebrow { font-size: 11px; }
+  .goal-heading .btn.outline { min-height: 30px; padding: 0 13px; font-size: 11px; }
+  .goal-section .metric-grid { gap: 6px; margin-bottom: 7px; }
+  .goal-section .metric { padding: 8px 7px; }
+  .goal-section .metric strong { margin-bottom: 2px; font-size: 19px; }
+  .goal-section .metric span { font-size: 10px; }
+  .goal-card { gap: 5px; margin-top: 6px; padding: 9px 11px; font-size: 13px; line-height: 1.3; }
+  .goal-card span { grid-template-columns: 21px 1fr; gap: 3px; }
+  .goal-card small { font-size: 10px; }
+  .cheer { padding: 10px; font-size: 12px; }
+}
 .week-strip { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
 .weekday, .day { text-align: center; font-size: 11px; }
 .weekday { padding: 5px 0; color: var(--muted); font-weight: 700; }
@@ -286,4 +303,33 @@ body { font-size: 14px; }
 .launch-cover-copy { position: relative; z-index: 1; display: grid; gap: 7px; width: min(100%, 420px); padding: 18px 20px; border: 1px solid rgba(255,255,255,.34); border-radius: 18px; background: rgba(20, 43, 31, .48); box-shadow: 0 12px 38px rgba(0,0,0,.25); text-align: left; backdrop-filter: blur(6px); }
 .launch-cover-copy strong { font: 800 30px/1.1 "Noto Serif SC", "Songti SC", serif; letter-spacing: .08em; }
 .launch-cover-copy small { color: rgba(255,255,255,.84); font-size: 13px; letter-spacing: .08em; }
+/* 修改时间：2026-09-08 17:40:00 +08:00；目的：同步训练、记录、复盘、知识和设置页面的字号与首页紧凑风格，减少小屏滚动长度。 */
+@media (max-width: 480px) {
+  .app-header h1 { font-size: 21px; }
+  .header-settings { min-height: 30px; padding-inline: 8px; font-size: 11px; }
+  .header-settings span { font-size: 13px; }
+  .card { padding: 15px; }
+  .card-head { gap: 9px; margin-bottom: 10px; }
+  .card-head h2, .section-title { font-size: 18px; }
+  .card-head p, .field label { font-size: 11px; }
+  .btn { min-height: 40px; padding-inline: 14px; font-size: 13px; }
+  .btn.ghost, .text-btn { font-size: 11px; }
+  .control { min-height: 42px; padding: 9px 11px; font-size: 13px; }
+  textarea.control { min-height: 82px; }
+  .score-btn { min-height: 36px; font-size: 13px; }
+  .record { padding: 11px 0; }
+  .record h3, .okr h3 { font-size: 14px; }
+  .record p, .record-detail p { font-size: 11px; }
+  .tag { min-height: 22px; padding-inline: 7px; font-size: 10px; }
+  .knowledge-row { font-size: 13px; }
+  .more-tile { min-height: 92px; padding: 12px; }
+  .more-tile b { margin-bottom: 5px; font-size: 16px; }
+  .more-tile span, .notice, .safe-note p { font-size: 10px; }
+  .calendar-head .section-title { font-size: 22px; }
+  .calendar-head .section-title small { font-size: 13px; }
+  .month-day { min-height: 72px; padding: 6px 1px; }
+  .month-day b { font-size: 14px; }
+  .month-day span { font-size: 8px; }
+  .update-result, .toast { font-size: 11px; }
+}
 .launch-cover.is-hiding { opacity: 0; pointer-events: none; }

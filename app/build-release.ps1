@@ -24,8 +24,8 @@ $apkSource = Join-Path $projectRoot 'android\app\build\outputs\apk\release\app-r
 # 修改时间：2026-09-08 09:45:00 +08:00；目的：将知识与设置分离后的 1.0.5 包独立交付，保留之前 APK 供回退。
 # 修改时间：2026-09-08 10:20:00 +08:00；目的：将 GitHub 版本清单检查和受限系统下载入口所在的 1.0.6 包独立交付，保留之前 APK 供回退。
 # 修改时间：2026-09-08 11:20:00 +08:00；目的：将主动联网边界说明修正后的 1.0.7 包独立交付，保留之前 APK 供回退。
-# 修改时间：2026-09-08 16:45:00 +08:00；目的：将月历手势、历史目标、生理期迁移和新图标版本独立交付。
-$apkTarget = Join-Path $DeliveryRoot '轻铁训练-v1.0.9-release.apk'
+# 修改时间：2026-09-08 17:40:00 +08:00；目的：将所有页面统一小字号布局版本独立交付。
+$apkTarget = Join-Path $DeliveryRoot '轻铁训练-v1.0.11-release.apk'
 
 foreach ($required in @($jdkRoot, $sdkRoot, $secretPath, $keystorePath)) {
     if (-not (Test-Path -LiteralPath $required)) {
