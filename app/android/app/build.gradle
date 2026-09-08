@@ -1,0 +1,86 @@
+apply plugin: 'com.android.application'
+
+// 修改时间：2026-08-20 16:00:02 +08:00；目的：在 Android 配置与任务校验之间共享仅来自环境变量的签名参数。
+def releaseKeystore = System.getenv('FITNESS_RELEASE_KEYSTORE')
+def releaseStorePassword = System.getenv('FITNESS_STORE_PASSWORD')
+def releaseKeyPassword = System.getenv('FITNESS_KEY_PASSWORD')
+
+android {
+    namespace = "cn.lightrail.fitnessokr"
+    compileSdk = rootProject.ext.compileSdkVersion
+    // 修改时间：2026-08-20 16:00:02 +08:00；目的：正式签名信息只从进程环境读取，不把口令写入源码或配置文件。
+    signingConfigs {
+        release {
+            if (releaseKeystore && releaseStorePassword && releaseKeyPassword) {
+                storeFile file(releaseKeystore)
+                storePassword releaseStorePassword
+                keyAlias 'fitness-okr-release'
+                keyPassword releaseKeyPassword
+                enableV1Signing true
+                enableV2Signing true
+                enableV3Signing true
+                enableV4Signing true
+            }
+        }
+    }
+    defaultConfig {
+        applicationId "cn.lightrail.fitnessokr"
+        minSdkVersion rootProject.ext.minSdkVersion
+        targetSdkVersion rootProject.ext.targetSdkVersion
+        // 修改时间：2026-09-07 18:18:00 +08:00；目的：提升 APK 版本号，使已安装的旧版可被本次小程序界面对齐版本正常覆盖更新。
+        // 修改时间：2026-09-07 18:46:00 +08:00；目的：封面更新后递增版本，允许设备将 1.0.1 无缝升级到包含启动封面的 1.0.2。
+        // 修改时间：2026-09-07 19:05:00 +08:00；目的：首页鼓励图和本地版本检查入口更新后递增版本，保证设备可以继续覆盖安装。
+        // 修改时间：2026-09-07 19:35:00 +08:00；目的：媒体本地存储和上半部分启动封面更新后递增版本，保证设备可以继续覆盖安装。
+        // 修改时间：2026-09-08 10:20:00 +08:00；目的：发布受限 GitHub HTTPS 更新检查后的新版本，避免覆盖已有 1.0.5 安装包。
+        versionCode 7
+        versionName "1.0.6"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        aaptOptions {
+             // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
+             // Default: https://android.googlesource.com/platform/frameworks/base/+/282e181b58cf72b6ca770dc7ca5f91f135444502/tools/aapt/AaptAssets.cpp#61
+            ignoreAssetsPattern = '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
+        }
+    }
+    buildTypes {
+        release {
+            // 修改时间：2026-08-20 15:46:01 +08:00；目的：正式包启用代码压缩和资源裁剪，减少可攻击面与无用代码。
+            minifyEnabled true
+            shrinkResources true
+            debuggable false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            if (releaseKeystore && releaseStorePassword && releaseKeyPassword) {
+                signingConfig signingConfigs.release
+            }
+        }
+    }
+}
+
+// 修改时间：2026-08-20 16:00:02 +08:00；目的：阻止缺少正式密钥时误产出未签名的交付 APK。
+gradle.taskGraph.whenReady { graph ->
+    if (graph.allTasks.any { it.name.toLowerCase().contains('release') } &&
+        (!releaseKeystore || !releaseStorePassword || !releaseKeyPassword)) {
+        throw new GradleException('Release signing environment is incomplete.')
+    }
+}
+
+repositories {
+    flatDir{
+        dirs '../capacitor-cordova-android-plugins/src/main/libs', 'libs'
+    }
+}
+
+dependencies {
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    implementation "androidx.appcompat:appcompat:$androidxAppCompatVersion"
+    implementation "androidx.coordinatorlayout:coordinatorlayout:$androidxCoordinatorLayoutVersion"
+    implementation "androidx.core:core-splashscreen:$coreSplashScreenVersion"
+    implementation project(':capacitor-android')
+    testImplementation "junit:junit:$junitVersion"
+    androidTestImplementation "androidx.test.ext:junit:$androidxJunitVersion"
+    androidTestImplementation "androidx.test.espresso:espresso-core:$androidxEspressoCoreVersion"
+    implementation project(':capacitor-cordova-android-plugins')
+}
+
+apply from: 'capacitor.build.gradle'
+
+// 修改时间：2026-08-20 15:46:01 +08:00；目的：离线应用不接入 Google Services、推送或分析 SDK。

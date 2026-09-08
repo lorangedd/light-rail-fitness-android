@@ -1,2 +1,13 @@
 # 修改时间：2026-09-08 10:05:00 +08:00；目的：发布 APK 作为 GitHub Release 附件上传，不将大型二进制副本提交至 Git 仓库。
 release-assets/
+# 修改时间：2026-09-08 11:00:00 +08:00；目的：忽略 Android 源码构建缓存、依赖和本机签名文件，仅保留可审查的源代码与发布说明。
+app/node_modules/
+app/android/.gradle/
+app/android/.idea/
+app/android/local.properties
+app/android/app/build/
+app/android/build/
+app/android/app/src/main/assets/
+app/**/*.jks
+app/**/*.keystore
+app/**/keystore.properties

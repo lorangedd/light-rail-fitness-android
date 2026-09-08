@@ -1,0 +1,18 @@
+{
+  "_comment": "修改时间：2026-08-20 15:46:01 +08:00；目的：建立离线 Android APK 的最小 Capacitor 构建工程。",
+  "name": "fitness-okr-android",
+  "version": "1.0.0",
+  "private": true,
+  "description": "离线优先的训练 OKR Android 应用",
+  "scripts": {
+    "android:sync": "cap sync android",
+    "android:open": "cap open android"
+  },
+  "dependencies": {
+    "@capacitor/android": "8.0.2",
+    "@capacitor/core": "8.0.2"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "8.0.2"
+  }
+}

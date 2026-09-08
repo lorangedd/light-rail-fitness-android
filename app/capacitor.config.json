@@ -1,0 +1,10 @@
+{
+  "_comment": "修改时间：2026-08-20 15:46:01 +08:00；目的：配置仅加载随 APK 打包的本地资源，禁止远程服务地址。",
+  "appId": "cn.lightrail.fitnessokr",
+  "appName": "轻铁训练",
+  "webDir": "www",
+  "server": {
+    "androidScheme": "https",
+    "cleartext": false
+  }
+}

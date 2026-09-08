@@ -1,0 +1,9 @@
+# 修改时间：2026-08-20 15:46:01 +08:00；目的：避免依赖、构建产物和本机签名材料进入版本库。
+node_modules/
+android/.gradle/
+android/.idea/
+android/local.properties
+android/app/build/
+*.jks
+*.keystore
+keystore.properties

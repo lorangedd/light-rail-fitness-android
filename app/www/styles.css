@@ -1,0 +1,278 @@
+/* 修改时间：2026-08-20 15:46:01 +08:00；目的：建立整洁、克制且适合单手操作的训练日志视觉系统。 */
+:root {
+  color-scheme: light;
+  --ink: #17211d;
+  --muted: #6e7873;
+  --paper: #f4f1e9;
+  --paper-deep: #e8e3d8;
+  --card: #fffdf8;
+  --green: #18392e;
+  --green-2: #2d5a49;
+  --lime: #c8d96f;
+  --line: rgba(23, 33, 29, .12);
+  --danger: #a23b32;
+  --shadow: 0 12px 32px rgba(34, 42, 37, .08);
+  --radius: 22px;
+}
+
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html { background: var(--paper); }
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at 85% 4%, rgba(200, 217, 111, .28), transparent 25rem),
+    linear-gradient(180deg, #f7f4ec 0%, var(--paper) 100%);
+  color: var(--ink);
+  font-family: "Noto Sans SC", "Microsoft YaHei", system-ui, sans-serif;
+  letter-spacing: .01em;
+}
+button, input, select, textarea { font: inherit; }
+button { cursor: pointer; }
+.app-shell { width: min(100%, 720px); min-height: 100vh; margin: 0 auto; position: relative; }
+.app-header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: calc(18px + env(safe-area-inset-top)) 20px 14px;
+  background: rgba(244, 241, 233, .9);
+  backdrop-filter: blur(18px);
+  border-bottom: 1px solid rgba(23, 33, 29, .08);
+}
+.brand-kicker, .eyebrow {
+  margin: 0 0 4px;
+  color: var(--green-2);
+  font-size: 11px;
+  line-height: 1.2;
+  font-weight: 800;
+  letter-spacing: .15em;
+  text-transform: uppercase;
+}
+.app-header h1 { margin: 0; font: 800 23px/1.18 Georgia, "Songti SC", serif; }
+.offline-badge { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; color: var(--green-2); }
+.offline-badge span { width: 8px; height: 8px; border-radius: 50%; background: #4d8e5b; box-shadow: 0 0 0 4px rgba(77, 142, 91, .12); }
+/* 修改时间：2026-09-08 09:35:00 +08:00；目的：将顶部状态区转换为轻量设置入口，确保知识与迁移设置拥有清晰的独立导航。 */
+.header-settings { display: inline-flex; align-items: center; gap: 5px; min-height: 34px; padding: 0 10px; border: 1px solid rgba(255,255,255,.18); border-radius: 999px; background: rgba(255,255,255,.05); color: rgba(255,255,255,.88); font-size: 12px; font-weight: 750; }
+.header-settings span { font-size: 15px; line-height: 1; }
+.app-main { padding: 18px 16px calc(104px + env(safe-area-inset-bottom)); }
+.bottom-nav {
+  position: fixed;
+  left: 50%;
+  bottom: 0;
+  z-index: 30;
+  width: min(100%, 720px);
+  transform: translateX(-50%);
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  padding: 7px 8px calc(7px + env(safe-area-inset-bottom));
+  background: rgba(255, 253, 248, .96);
+  backdrop-filter: blur(20px);
+  border-top: 1px solid var(--line);
+}
+.nav-item { min-height: 54px; border: 0; border-radius: 16px; background: transparent; color: var(--muted); font-size: 11px; font-weight: 700; }
+.nav-item span { display: block; }
+.nav-icon { margin-bottom: 3px; font-size: 20px; line-height: 1; }
+.nav-item.active { background: var(--green); color: #fff; }
+
+/* 修改时间：2026-09-07 18:05:00 +08:00；目的：对齐小程序截图的深绿顶栏、暖灰页面、白色信息卡和轻量底部文字导航。 */
+body { background: #f6f5f1; }
+.app-header { min-height: 86px; padding: calc(14px + env(safe-area-inset-top)) 20px 13px; background: #203a2c; border-bottom: 0; backdrop-filter: none; }
+.brand-kicker { color: rgba(255,255,255,.62); letter-spacing: .12em; }
+.app-header h1 { color: #fff; font-family: "Noto Serif SC", "Songti SC", serif; font-size: 25px; }
+.offline-badge { padding: 7px 9px; border: 1px solid rgba(255,255,255,.16); border-radius: 999px; color: rgba(255,255,255,.78); font-size: 11px; }
+.offline-badge span { background: #dbe58a; }
+.app-main { padding-top: 14px; }
+.bottom-nav { padding-top: 9px; background: rgba(255,255,255,.98); }
+.nav-item { min-height: 52px; border-radius: 0; color: #7a807b; font-size: 13px; font-weight: 650; }
+.nav-icon { display: none !important; }
+.nav-item.active { background: transparent; color: #203a2c; font-weight: 900; }
+.card { border-radius: 12px; background: #fff; box-shadow: 0 8px 20px rgba(36,49,39,.055); }
+.goal-section { padding: 18px; }
+.goal-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 13px; }
+.goal-heading .eyebrow { margin: 0; color: #58724f; font-size: 13px; letter-spacing: 0; text-transform: none; }
+.btn.outline { min-height: 38px; padding: 0 24px; border: 1px solid rgba(36,49,39,.18); border-radius: 7px; background: #fff; color: #243127; font-size: 13px; }
+.goal-section .metric-grid { margin-bottom: 12px; }
+.metric-grid.two { grid-template-columns: repeat(2, 1fr); }
+.metric { border: 0; border-radius: 6px; box-shadow: none; }
+.goal-section.blue .metric { background: #ddecfa; color: #286297; }
+.goal-section.yellow .metric { background: #fff2b9; color: #6c6000; }
+.goal-section.plain .metric { background: #eef1ea; }
+.metric strong { color: inherit; font-family: "Noto Serif SC", "Songti SC", serif; }
+.goal-card { display: grid; width: 100%; gap: 9px; margin-top: 10px; padding: 15px 16px; border: 0; border-radius: 4px; background: #f7f7f3; color: #243127; text-align: left; font-size: 16px; font-weight: 780; line-height: 1.48; }
+.goal-card span { display: grid; grid-template-columns: 26px 1fr; gap: 4px; }
+.goal-card b { color: #58724f; }
+.goal-card small { color: #81877f; font-size: 12px; font-weight: 500; }
+.cheer { padding: 16px; border-radius: 999px; background: #fff; color: #4d6948; box-shadow: var(--shadow); text-align: center; font-size: 14px; font-weight: 800; }
+/* 修改时间：2026-09-07 19:05:00 +08:00；目的：将小程序的小女孩和小猫鼓励图完整放在 Android 首页底部，保持与小程序相同的气泡和轻微摇摆效果。 */
+.mascot-cheer { position: relative; display: grid; place-items: end center; min-height: 355px; margin: -2px 0 4px; padding-top: 55px; overflow: hidden; }
+.mascot-cheer img { width: min(78%, 304px); height: auto; filter: drop-shadow(0 12px 18px rgba(36,49,39,.13)); animation: mascot-cheer-sway 2.2s ease-in-out infinite; }
+.mascot-bubble { position: absolute; top: 8px; z-index: 1; padding: 10px 17px; border: 1px solid rgba(36,49,39,.12); border-radius: 999px; background: #fff; color: #243127; box-shadow: 0 7px 16px rgba(36,49,39,.08); font-size: 13px; font-weight: 800; }
+.mascot-bubble::after { content: ""; position: absolute; left: 50%; bottom: -6px; width: 11px; height: 11px; border-right: 1px solid rgba(36,49,39,.12); border-bottom: 1px solid rgba(36,49,39,.12); background: #fff; transform: translateX(-50%) rotate(45deg); }
+@keyframes mascot-cheer-sway { 0%,100% { transform: translateY(0) rotate(-1deg); } 50% { transform: translateY(-6px) rotate(1deg); } }
+.version-card h2 { margin: 3px 0 7px; font: 800 21px/1.2 "Noto Serif SC", "Songti SC", serif; }
+.version-card p:not(.eyebrow) { margin: 0 0 13px; color: #69736d; font-size: 13px; line-height: 1.65; }
+/* 修改时间：2026-09-08 10:20:00 +08:00；目的：为在线版本核验提供清晰且不夸张的结果层级，突出已校验更新与安全失败提示。 */
+.version-card .btn[disabled] { cursor: progress; opacity: .62; }
+.update-hint { margin: 12px 0 0 !important; color: #7a807b !important; font-size: 11px !important; }
+.update-result { margin-top: 13px; padding: 12px 13px; border-radius: 8px; font-size: 12px; line-height: 1.6; }
+.update-result.checking, .update-result.current { background: #eef1ea; color: #52635a; }
+.update-result.error { border-left: 3px solid #b06b52; background: #fbf2eb; color: #7e4737; }
+.update-result.available { border: 1px solid rgba(88,114,79,.28); background: #f3f7ed; color: #294432; }
+.update-result.available b { display: block; margin-bottom: 4px; font-size: 14px; }
+.update-result.available p { margin: 0 0 7px !important; color: #52635a !important; }
+.update-result.available small { display: block; margin-bottom: 11px; overflow-wrap: anywhere; color: #58724f; font: 700 10px/1.45 ui-monospace, Consolas, monospace; }
+/* 修改时间：2026-09-08 09:35:00 +08:00；目的：为独立设置页提供与现有白色卡片一致的分组、层级和可点击行样式。 */
+.settings-intro h2 { margin: 2px 0 7px; font: 800 22px/1.2 "Noto Serif SC", "Songti SC", serif; }
+.settings-intro p:not(.eyebrow) { margin: 0; color: #69736d; font-size: 13px; line-height: 1.65; }
+.settings-list { padding: 0 16px; overflow: hidden; }
+.settings-row { display: grid; grid-template-columns: 34px 1fr 16px; align-items: center; gap: 11px; width: 100%; min-height: 76px; padding: 11px 0; border: 0; border-bottom: 1px solid var(--line); background: transparent; color: var(--ink); text-align: left; }
+.settings-row:last-child { border-bottom: 0; }
+.settings-row b, .settings-row small { display: block; }
+.settings-row b { margin-bottom: 4px; color: var(--green); font-size: 15px; }
+.settings-row small { color: var(--muted); font-size: 11px; line-height: 1.45; }
+.settings-glyph { display: grid; place-items: center; width: 30px; height: 30px; border-radius: 9px; background: #eef1ea; color: #58724f; font-size: 17px; font-weight: 800; }
+.settings-row i { color: #8a928c; font-size: 22px; font-style: normal; }
+
+/* 修改时间：2026-09-07 19:35:00 +08:00；目的：提供 Android 本地照片和短视频的附件选择、缩略预览、缺失提示和删除操作，不依赖远程媒体地址。 */
+.visually-hidden { position: absolute; width: 1px; height: 1px; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; }
+.media-section .card-head p:last-child { margin: 6px 0 0; color: #7a807b; font-size: 12px; line-height: 1.5; }
+.media-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: 13px; }
+.media-item { position: relative; display: grid; min-height: 132px; overflow: hidden; border: 1px solid rgba(36,49,39,.12); border-radius: 10px; background: #eef1ea; }
+.media-preview { width: 100%; height: 100%; min-height: 132px; object-fit: cover; background: #17211d; }
+video.media-preview { object-fit: contain; }
+.media-loading, .media-missing { display: grid; place-items: center; padding: 12px; color: #65706a; font-size: 12px; line-height: 1.5; text-align: center; }
+.media-missing { background: #fff8e6; color: #8a671d; }
+.media-remove { position: absolute; top: 6px; right: 6px; z-index: 2; display: grid; place-items: center; width: 27px; height: 27px; border: 0; border-radius: 50%; background: rgba(23,33,29,.78); color: #fff; font-size: 20px; line-height: 1; }
+.media-empty { padding-block: 15px; }
+.record-media { margin-top: 4px; }
+.record-media > p { margin: 0; color: #58724f; font-size: 12px; font-weight: 800; }
+.calendar-head { align-items: flex-start; }
+.calendar-head .section-title { font-size: 26px; }
+.calendar-head .section-title small { color: #929791; font-size: 16px; font-weight: 500; }
+.calendar-head input { width: 124px; font-size: 12px; }
+.month-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; }
+.month-day { display: grid; align-content: start; justify-items: center; min-height: 82px; padding: 8px 2px; border: 0; border-radius: 3px; background: transparent; color: #243127; }
+.month-day b { font-size: 16px; }
+.month-day span { width: 100%; margin-top: 4px; padding: 2px 1px; overflow: hidden; border-radius: 3px; background: #e8f3e5; color: #4f7a49; font-size: 9px; line-height: 1.2; text-overflow: ellipsis; white-space: nowrap; }
+.month-day span:nth-child(3) { background: #eee9fa; color: #7b5c9c; }
+.month-day.selected { background: #e5f6e9; color: #00a651; }
+.month-day.blank { visibility: hidden; }
+.review-metrics { grid-template-columns: repeat(2,1fr); }
+.review-metrics .metric:last-child { grid-column: 1 / -1; }
+.review-metrics .metric { background: #eef1ea; }
+.tappable { cursor: pointer; }
+.tappable:active { opacity: .78; transform: scale(.995); }
+.record.expanded { border-bottom-color: rgba(0,200,83,.38); }
+.record-detail { display: grid; gap: 7px; margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--line); }
+.intro-card h2, .migration-card h2 { margin: 4px 0 7px; font: 800 22px/1.2 "Noto Serif SC", "Songti SC", serif; }
+.intro-card p, .migration-card p { color: #69736d; font-size: 13px; line-height: 1.65; }
+.migration-card { border-left: 4px solid #d8e486; }
+.knowledge-row { display: grid; grid-template-columns: 28px 1fr; width: 100%; padding: 11px 0; border: 0; border-bottom: 1px solid var(--line); background: transparent; color: #243127; text-align: left; font-size: 14px; font-weight: 700; line-height: 1.42; }
+.knowledge-row:last-child { border-bottom: 0; }
+.knowledge-row b { color: #58724f; }
+.stack { display: grid; gap: 14px; }
+.hero {
+  overflow: hidden;
+  position: relative;
+  padding: 24px;
+  border-radius: 28px;
+  color: #fff;
+  background: var(--green);
+  box-shadow: 0 18px 44px rgba(24, 57, 46, .18);
+}
+.hero::after { content: ""; position: absolute; width: 150px; height: 150px; right: -48px; top: -58px; border: 32px solid rgba(200, 217, 111, .17); border-radius: 50%; }
+.hero .eyebrow { color: var(--lime); }
+.hero h2 { position: relative; z-index: 1; margin: 10px 0 6px; max-width: 85%; font: 800 30px/1.12 Georgia, "Songti SC", serif; }
+.hero p { position: relative; z-index: 1; margin: 0; color: rgba(255, 255, 255, .72); font-size: 13px; line-height: 1.7; }
+.metric-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.metric { padding: 16px 12px; border: 1px solid var(--line); border-radius: 18px; background: var(--card); box-shadow: var(--shadow); }
+.metric strong { display: block; margin-bottom: 4px; font: 800 24px/1 Georgia, serif; color: var(--green); }
+.metric span { color: var(--muted); font-size: 11px; }
+.card { padding: 19px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--card); box-shadow: var(--shadow); }
+.card-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 15px; }
+.card-head h2, .section-title { margin: 0; font: 800 20px/1.25 Georgia, "Songti SC", serif; }
+.card-head p { margin: 5px 0 0; color: var(--muted); font-size: 12px; }
+.btn { min-height: 46px; padding: 0 18px; border: 0; border-radius: 14px; background: var(--green); color: #fff; font-weight: 800; }
+.btn:active { transform: translateY(1px); }
+.btn.secondary { border: 1px solid var(--line); background: var(--paper); color: var(--ink); }
+.btn.ghost { min-height: 38px; padding: 0 12px; background: rgba(24, 57, 46, .08); color: var(--green); font-size: 12px; }
+.btn.danger { background: var(--danger); color: #fff; }
+.btn.full { width: 100%; }
+.actions { display: flex; flex-wrap: wrap; gap: 9px; }
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.field { display: grid; gap: 7px; }
+.field.full { grid-column: 1 / -1; }
+.field label { color: #44504b; font-size: 12px; font-weight: 800; }
+.control { width: 100%; min-height: 48px; padding: 11px 13px; border: 1px solid rgba(23, 33, 29, .16); border-radius: 13px; outline: none; background: #fff; color: var(--ink); }
+.control:focus { border-color: var(--green-2); box-shadow: 0 0 0 3px rgba(45, 90, 73, .1); }
+textarea.control { min-height: 94px; resize: vertical; line-height: 1.55; }
+.score-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 7px; }
+.score-btn { min-height: 42px; border: 1px solid var(--line); border-radius: 12px; background: #fff; color: var(--muted); font-weight: 800; }
+.score-btn.selected { border-color: var(--green); background: var(--green); color: #fff; }
+.record { padding: 15px 0; border-bottom: 1px dashed rgba(23, 33, 29, .15); }
+.record:last-child { padding-bottom: 0; border-bottom: 0; }
+.record-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.record h3 { margin: 0 0 6px; font-size: 15px; line-height: 1.45; }
+.record p { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.6; }
+.tag { display: inline-flex; align-items: center; min-height: 25px; padding: 0 9px; border-radius: 999px; background: #e9eddf; color: var(--green); font-size: 11px; font-weight: 800; white-space: nowrap; }
+.record-actions { display: flex; gap: 7px; margin-top: 10px; }
+.text-btn { min-height: 34px; border: 0; background: transparent; color: var(--green-2); font-size: 12px; font-weight: 800; }
+.text-btn.delete { color: var(--danger); }
+.okr { padding: 13px 0; border-top: 1px solid var(--line); }
+.okr:first-of-type { border-top: 0; }
+.okr h3 { margin: 0 0 4px; font-size: 15px; }
+.progress { display: block; width: 100%; height: 7px; margin-top: 8px; overflow: hidden; border: 0; border-radius: 999px; appearance: none; background: var(--paper-deep); }
+.progress::-webkit-progress-bar { background: var(--paper-deep); }
+.progress::-webkit-progress-value { border-radius: 999px; background: var(--lime); }
+.calendar-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.calendar-head input { width: auto; min-height: 40px; }
+.week-strip { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+.weekday, .day { text-align: center; font-size: 11px; }
+.weekday { padding: 5px 0; color: var(--muted); font-weight: 700; }
+.day { min-height: 46px; padding: 6px 2px; border: 1px solid transparent; border-radius: 12px; background: transparent; color: var(--ink); }
+.day.has-session::after { content: ""; display: block; width: 5px; height: 5px; margin: 3px auto 0; border-radius: 50%; background: var(--green-2); }
+.day.selected { border-color: var(--green); background: var(--green); color: #fff; }
+.day.selected::after { background: var(--lime); }
+.empty { padding: 22px 10px; text-align: center; color: var(--muted); font-size: 13px; }
+.segment { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; padding: 4px; border-radius: 14px; background: var(--paper-deep); }
+.segment button { min-height: 38px; border: 0; border-radius: 11px; background: transparent; color: var(--muted); font-weight: 800; }
+.segment button.active { background: var(--card); color: var(--green); box-shadow: 0 3px 10px rgba(23, 33, 29, .08); }
+.more-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.more-tile { min-height: 108px; padding: 16px; border: 1px solid var(--line); border-radius: 18px; background: var(--card); color: var(--ink); text-align: left; box-shadow: var(--shadow); }
+.more-tile b { display: block; margin-bottom: 8px; color: var(--green); font: 800 18px Georgia, serif; }
+.more-tile span { color: var(--muted); font-size: 11px; line-height: 1.5; }
+.backup-box { min-height: 150px; font-family: ui-monospace, Consolas, monospace; font-size: 11px; }
+.notice { padding: 13px; border-left: 3px solid var(--lime); border-radius: 0 12px 12px 0; background: rgba(200, 217, 111, .12); color: #435047; font-size: 12px; line-height: 1.65; }
+.toast { position: fixed; left: 50%; bottom: calc(92px + env(safe-area-inset-bottom)); z-index: 60; transform: translate(-50%, 18px); max-width: calc(100% - 40px); padding: 11px 16px; border-radius: 999px; background: #17211d; color: #fff; font-size: 13px; opacity: 0; pointer-events: none; transition: .2s ease; }
+.toast.show { transform: translate(-50%, 0); opacity: 1; }
+.dialog { width: min(88%, 400px); padding: 0; border: 0; border-radius: 22px; background: var(--card); color: var(--ink); box-shadow: 0 24px 80px rgba(0, 0, 0, .3); }
+.dialog::backdrop { background: rgba(11, 19, 16, .48); backdrop-filter: blur(3px); }
+.dialog form { padding: 22px; }
+.dialog h2 { margin: 0 0 9px; font: 800 21px Georgia, serif; }
+.dialog p { margin: 0 0 20px; color: var(--muted); line-height: 1.6; }
+.dialog-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.safe-note { display: flex; gap: 10px; align-items: flex-start; }
+.safe-note .shield { display: grid; place-items: center; flex: 0 0 38px; height: 38px; border-radius: 13px; background: var(--green); color: var(--lime); }
+.safe-note p { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.6; }
+@media (max-width: 390px) {
+  .app-main { padding-inline: 12px; }
+  .metric-grid { gap: 6px; }
+  .metric { padding-inline: 9px; }
+  .form-grid { grid-template-columns: 1fr; }
+  .field.full { grid-column: auto; }
+}
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; } }
+
+/* 修改时间：2026-09-07 18:42:00 +08:00；目的：以用户提供的纵向健身插画建立不拉伸的全屏启动封面，并为文字提供清晰可读的深色渐变底。 */
+.launch-cover { position: fixed; inset: 0; z-index: 100; display: grid; place-items: end center; width: 100%; padding: max(34px, env(safe-area-inset-top)) 22px calc(38px + env(safe-area-inset-bottom)); overflow: hidden; border: 0; background: #1d382b; color: #fff; cursor: pointer; opacity: 1; transition: opacity .24s ease; }
+.launch-cover::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(20, 37, 28, .08) 34%, rgba(12, 29, 20, .78) 100%); pointer-events: none; }
+/* 修改时间：2026-09-07 19:35:00 +08:00；目的：上半部分封面已按手机竖屏比例裁切，启动时从画面顶部对齐以保留人物脸部和举拳。 */
+.launch-cover img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center top; }
+.launch-cover-copy { position: relative; z-index: 1; display: grid; gap: 7px; width: min(100%, 420px); padding: 18px 20px; border: 1px solid rgba(255,255,255,.34); border-radius: 18px; background: rgba(20, 43, 31, .48); box-shadow: 0 12px 38px rgba(0,0,0,.25); text-align: left; backdrop-filter: blur(6px); }
+.launch-cover-copy strong { font: 800 30px/1.1 "Noto Serif SC", "Songti SC", serif; letter-spacing: .08em; }
+.launch-cover-copy small { color: rgba(255,255,255,.84); font-size: 13px; letter-spacing: .08em; }
+.launch-cover.is-hiding { opacity: 0; pointer-events: none; }

@@ -1,0 +1,54 @@
+<!doctype html>
+<!-- 修改时间：2026-08-20 15:46:01 +08:00；目的：建立离线 Android 应用的单页入口和严格内容安全策略。 -->
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no" />
+    <meta name="theme-color" content="#18392e" />
+    <!-- 修改时间：2026-09-08 10:20:00 +08:00；目的：仅允许用户主动检查更新时读取指定 GitHub Raw 版本清单，其他网络连接仍被 CSP 拒绝。 -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src https://raw.githubusercontent.com; img-src 'self' data: blob:; media-src blob:; style-src 'self'; script-src 'self'; font-src 'self'; object-src 'none'; frame-src 'none'; base-uri 'none'; form-action 'none'; upgrade-insecure-requests" />
+    <title>轻铁训练</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <!-- 修改时间：2026-09-07 18:42:00 +08:00；目的：将用户提供的健身插画作为应用打开后可见的本地启动封面，不请求任何远程图片。 -->
+    <button id="launch-cover" class="launch-cover" type="button" aria-label="轻触进入轻铁训练">
+      <img src="assets/fitness-cover-upper.png" alt="身穿绿色运动装、展示力量的健身插画上半部分" />
+      <span class="launch-cover-copy"><strong>轻铁训练</strong><small>稳稳变强 · 轻触进入</small></span>
+    </button>
+    <div class="app-shell">
+      <header class="app-header">
+        <div>
+          <p class="brand-kicker">轻铁训练 · 离线本地</p>
+          <h1 id="page-title">目标</h1>
+        </div>
+        <!-- 修改时间：2026-09-08 09:35:00 +08:00；目的：为数据迁移、版本信息和安全选项建立独立设置入口，避免与知识库内容混排。 -->
+        <button type="button" class="header-settings" data-route="settings" aria-label="打开设置"><span aria-hidden="true">⚙</span>设置</button>
+      </header>
+      <main id="app" class="app-main" aria-live="polite"></main>
+      <nav class="bottom-nav" aria-label="主导航">
+        <button type="button" data-route="today" class="nav-item active"><span class="nav-icon">◒</span><span>目标</span></button>
+        <button type="button" data-route="workout" class="nav-item"><span class="nav-icon">＋</span><span>训练</span></button>
+        <button type="button" data-route="records" class="nav-item"><span class="nav-icon">▦</span><span>记录</span></button>
+        <button type="button" data-route="review" class="nav-item"><span class="nav-icon">↗</span><span>复盘</span></button>
+        <!-- 修改时间：2026-09-08 09:35:00 +08:00；目的：底部知识入口直接进入纯知识库，设置功能移至顶部独立入口。 -->
+        <button type="button" data-route="knowledge" class="nav-item"><span class="nav-icon">◌</span><span>知识</span></button>
+      </nav>
+    </div>
+    <div id="toast" class="toast" role="status"></div>
+    <dialog id="confirm-dialog" class="dialog">
+      <form method="dialog">
+        <h2 id="confirm-title">请确认</h2>
+        <p id="confirm-message"></p>
+        <div class="dialog-actions">
+          <button value="cancel" class="btn secondary">取消</button>
+          <button id="confirm-action" value="confirm" class="btn danger">确认</button>
+        </div>
+      </form>
+    </dialog>
+    <script src="catalog.js" defer></script>
+    <script src="store.js" defer></script>
+    <script src="media-vault.js" defer></script>
+    <script src="app.js" defer></script>
+  </body>
+</html>
