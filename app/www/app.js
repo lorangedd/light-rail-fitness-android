@@ -8,9 +8,9 @@
   const title = document.getElementById("page-title");
   const toast = document.getElementById("toast");
   const dialog = document.getElementById("confirm-dialog");
-  // 修改时间：2026-09-08 10:20:00 +08:00；目的：标记接入受限在线更新检查后的安装包版本，并用于与远程清单做安全比较。
-  const APP_VERSION = "1.0.6";
-  const APP_VERSION_CODE = 7;
+  // 修改时间：2026-09-08 11:45:00 +08:00；目的：使页面显示版本与 Android 版本号和远程清单一致，避免应用把自身误判为可更新版本。
+  const APP_VERSION = "1.0.8";
+  const APP_VERSION_CODE = 9;
   // 修改时间：2026-09-08 10:20:00 +08:00；目的：固定唯一版本清单地址，禁止由页面数据或用户输入改变更新检查目标。
   const UPDATE_MANIFEST_URL = "https://raw.githubusercontent.com/lorangedd/light-rail-fitness-android/main/version.json";
   const TRUSTED_RELEASE_PREFIX = "https://github.com/lorangedd/light-rail-fitness-android/releases/download/";
