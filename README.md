@@ -1,6 +1,6 @@
 # 轻铁训练 Android 发布页
 
-<!-- 修改时间：2026-09-08 18:35:00 +08:00；目的：更新 v1.0.12 发布、校验与同步后的 GitHub HTTPS 版本检查说明。 -->
+<!-- 修改时间：2026-09-08 18:50:00 +08:00；目的：更新 v1.0.13 发布、校验与同步后的 GitHub HTTPS 版本检查说明。 -->
 
 这里仅发布轻铁训练 Android 离线版的正式安装包与机器可读的版本清单。
 
@@ -8,10 +8,10 @@
 
 请从 [Releases](../../releases) 下载最新 APK。安装前应核对 Release 页面及 `version.json` 中的 SHA-256。
 
-当前版本为 `1.0.12`（versionCode `13`）：
+当前版本为 `1.0.13`（versionCode `14`）：
 
 - 包名：`cn.lightrail.fitnessokr`
-- SHA-256：`9BBE945550B199B87F0A17DFD32CD0680B08CB1AAF030886672D5E89E1FFB2DC`
+- SHA-256：`E5813B110906DBEB3C2D02615EC4CE976622BED4E16DD912DEC5EF4A12BCB49A`
 - 签名：APK Signature Scheme v2、v3
 
 ## 在线更新机制

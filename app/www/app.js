@@ -9,9 +9,9 @@
   const toast = document.getElementById("toast");
   const dialog = document.getElementById("confirm-dialog");
   // 修改时间：2026-09-08 11:45:00 +08:00；目的：使页面显示版本与 Android 版本号和远程清单一致，避免应用把自身误判为可更新版本。
-  // 修改时间：2026-09-08 18:20:00 +08:00；目的：发布白色底色、知识搜索折叠和备份清空行为更新，避免覆盖已安装包。
-  const APP_VERSION = "1.0.12";
-  const APP_VERSION_CODE = 13;
+  // 修改时间：2026-09-08 18:45:00 +08:00；目的：修正知识搜索连续输入时的焦点保持，避免覆盖已安装包。
+  const APP_VERSION = "1.0.13";
+  const APP_VERSION_CODE = 14;
   // 修改时间：2026-09-08 10:20:00 +08:00；目的：固定唯一版本清单地址，禁止由页面数据或用户输入改变更新检查目标。
   const UPDATE_MANIFEST_URL = "https://raw.githubusercontent.com/lorangedd/light-rail-fitness-android/main/version.json";
   const TRUSTED_RELEASE_PREFIX = "https://github.com/lorangedd/light-rail-fitness-android/releases/download/";
@@ -466,7 +466,15 @@
 
   // 修改时间：2026-09-08 18:20:00 +08:00；目的：知识页搜索框输入时即时按标题、分类和正文关键词筛选。
   app.addEventListener("input", (event) => {
-    if (event.target.id === "knowledge-search") { state.knowledgeSearch = event.target.value; render(); }
+    if (event.target.id === "knowledge-search") {
+      // 修改时间：2026-09-08 18:45:00 +08:00；目的：搜索重绘后恢复焦点和光标位置，避免连续输入时输入框失焦。
+      const cursor = event.target.selectionStart;
+      state.knowledgeSearch = event.target.value;
+      render();
+      const next = document.getElementById("knowledge-search");
+      next?.focus();
+      if (next && cursor !== null) next.setSelectionRange(cursor, cursor);
+    }
   });
 
   // 修改时间：2026-09-08 16:40:00 +08:00；目的：将记录页月历手势映射为左滑上月、右滑下月，并忽略垂直滚动。
