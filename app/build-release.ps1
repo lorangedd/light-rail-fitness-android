@@ -17,7 +17,7 @@ $sdkRoot = Join-Path $ToolchainRoot 'android-sdk'
 $secretPath = Join-Path $DeliveryRoot 'signing\signing-secret.dpapi'
 $keystorePath = Join-Path $DeliveryRoot 'signing\fitness-okr-release.jks'
 $apkSource = Join-Path $projectRoot 'android\app\build\outputs\apk\release\app-release.apk'
-# 修改时间：2026-09-08 19:20:00 +08:00；目的：将本次页面交互与布局更新以独立 1.0.14 APK 文件交付，避免覆盖旧版本后难以辨识。
+# 修改时间：2026-09-11 10:20:00 +08:00；目的：将文本暂存功能以独立 1.0.15 APK 文件交付，避免覆盖旧版本后难以辨识。
 # 修改时间：2026-09-07 18:46:00 +08:00；目的：将包含用户指定启动封面的 1.0.2 包使用独立文件名交付，保留之前 APK 供回退。
 # 修改时间：2026-09-07 19:05:00 +08:00；目的：将首页鼓励图和本地版本检查入口所在的 1.0.3 包独立交付，保留之前 APK 供回退。
 # 修改时间：2026-09-07 19:35:00 +08:00；目的：将本地媒体附件和上半部分封面所在的 1.0.4 包独立交付，保留之前 APK 供回退。
@@ -25,7 +25,7 @@ $apkSource = Join-Path $projectRoot 'android\app\build\outputs\apk\release\app-r
 # 修改时间：2026-09-08 10:20:00 +08:00；目的：将 GitHub 版本清单检查和受限系统下载入口所在的 1.0.6 包独立交付，保留之前 APK 供回退。
 # 修改时间：2026-09-08 11:20:00 +08:00；目的：将主动联网边界说明修正后的 1.0.7 包独立交付，保留之前 APK 供回退。
 # 修改时间：2026-09-08 18:45:00 +08:00；目的：将知识搜索焦点保持修正版独立交付。
-$apkTarget = Join-Path $DeliveryRoot '轻铁训练-v1.0.14-release.apk'
+$apkTarget = Join-Path $DeliveryRoot '轻铁训练-v1.0.15-release.apk'
 
 foreach ($required in @($jdkRoot, $sdkRoot, $secretPath, $keystorePath)) {
     if (-not (Test-Path -LiteralPath $required)) {

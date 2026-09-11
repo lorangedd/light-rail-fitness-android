@@ -1,10 +1,10 @@
 {
   "schema": 1,
   "packageName": "cn.lightrail.fitnessokr",
-  "versionCode": 15,
-  "versionName": "1.0.14",
-  "apkUrl": "https://github.com/lorangedd/light-rail-fitness-android/releases/download/v1.0.14/light-rail-training-v1.0.14-release.apk",
-  "sha256": "95124FFC29AC11FB85EA9FBC6942E4F26AFF79F03EE57994594F3688A11D94C9",
-  "publishedAt": "2026-09-08T19:25:00+08:00",
-  "notes": "首页目标改为点击进入且统计卡片边框透明；记录页生理期改为红点并调整按钮位置，月历更紧凑；复盘按周/月筛选并精简为心得字段；知识点展开后才显示编辑和删除。"
+  "versionCode": 16,
+  "versionName": "1.0.15",
+  "apkUrl": "https://github.com/lorangedd/light-rail-fitness-android/releases/download/v1.0.15/light-rail-training-v1.0.15-release.apk",
+  "sha256": "0942067CD732513A220731CAC9EF8B14DDC5DE4CD93013D05B0DD6FBA7F336CB",
+  "publishedAt": "2026-09-11T10:30:00+08:00",
+  "notes": "新增训练、复盘、目标和知识点表单的本地文本草稿暂存；离开页面、切换页面或重新打开应用后可恢复，保存或取消时清理对应草稿。"
 }

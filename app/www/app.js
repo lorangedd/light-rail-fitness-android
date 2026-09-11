@@ -10,12 +10,14 @@
   const dialog = document.getElementById("confirm-dialog");
   // 修改时间：2026-09-08 11:45:00 +08:00；目的：使页面显示版本与 Android 版本号和远程清单一致，避免应用把自身误判为可更新版本。
   // 修改时间：2026-09-08 18:45:00 +08:00；目的：修正知识搜索连续输入时的焦点保持，避免覆盖已安装包。
-  // 修改时间：2026-09-08 19:20:00 +08:00；目的：标记本次页面布局、复盘字段和记录页交互更新版本。
-  const APP_VERSION = "1.0.14";
-  const APP_VERSION_CODE = 15;
+  // 修改时间：2026-09-11 10:20:00 +08:00；目的：标记表单文本本地暂存功能版本，确保在线版本检查与 APK 一致。
+  const APP_VERSION = "1.0.15";
+  const APP_VERSION_CODE = 16;
   // 修改时间：2026-09-08 10:20:00 +08:00；目的：固定唯一版本清单地址，禁止由页面数据或用户输入改变更新检查目标。
   const UPDATE_MANIFEST_URL = "https://raw.githubusercontent.com/lorangedd/light-rail-fitness-android/main/version.json";
   const TRUSTED_RELEASE_PREFIX = "https://github.com/lorangedd/light-rail-fitness-android/releases/download/";
+  // 修改时间：2026-09-11 10:05:00 +08:00；目的：为离开页面后仍需恢复的表单文本建立独立本地草稿存储，不混入正式训练数据。
+  const DRAFTS_KEY = "fitness_okr_form_drafts_v1";
   const state = {
     route: "today",
     subroute: "menu",
@@ -44,6 +46,61 @@
 
   function escapeHtml(value) {
     return String(value ?? "").replace(/[&<>'"]/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" }[char]));
+  }
+
+  // 修改时间：2026-09-11 10:05:00 +08:00；目的：安全读写本地表单草稿，单个表单只保存控件值，不保存附件 Blob 或远程数据。
+  function readDrafts() {
+    try {
+      const value = JSON.parse(localStorage.getItem(DRAFTS_KEY) || "{}");
+      return value && typeof value === "object" ? value : {};
+    } catch (_) { return {}; }
+  }
+
+  function saveFormDraft(form) {
+    const scope = form?.dataset.draftScope;
+    if (!scope) return;
+    const values = {};
+    form.querySelectorAll("input, textarea, select").forEach((control) => {
+      if (!control.name || control.type === "file") return;
+      values[control.name] = control.value;
+    });
+    try {
+      const drafts = readDrafts();
+      drafts[scope] = { values, savedAt: new Date().toISOString() };
+      localStorage.setItem(DRAFTS_KEY, JSON.stringify(drafts));
+    } catch (_) { /* 存储空间不足时不影响正式数据保存。 */ }
+  }
+
+  function clearFormDraft(form) {
+    const scope = form?.dataset.draftScope;
+    if (!scope) return;
+    try {
+      const drafts = readDrafts();
+      delete drafts[scope];
+      localStorage.setItem(DRAFTS_KEY, JSON.stringify(drafts));
+    } catch (_) { /* 草稿清理失败不影响已保存的正式记录。 */ }
+  }
+
+  function clearAllFormDrafts() {
+    try { localStorage.removeItem(DRAFTS_KEY); } catch (_) { /* 本地存储不可用时继续完成当前操作。 */ }
+  }
+
+  // 修改时间：2026-09-11 10:05:00 +08:00；目的：每次页面重绘后恢复同一路由和编辑对象对应的文本草稿。
+  function restoreFormDrafts() {
+    const drafts = readDrafts();
+    app.querySelectorAll("form[data-draft-scope]").forEach((form) => {
+      const values = drafts[form.dataset.draftScope]?.values;
+      if (!values) return;
+      Object.entries(values).forEach(([name, value]) => {
+        const control = form.elements.namedItem(name);
+        if (control && control.type !== "file") control.value = value;
+      });
+      form.querySelectorAll("[data-score-name]").forEach((row) => {
+        const hidden = form.elements.namedItem(row.dataset.scoreName);
+        if (!hidden) return;
+        row.querySelectorAll("[data-score]").forEach((button) => button.classList.toggle("selected", button.dataset.score === hidden.value));
+      });
+    });
   }
 
   function num(value) {
@@ -151,6 +208,7 @@
     if (state.route === "review") app.innerHTML = renderReview();
     if (state.route === "knowledge") app.innerHTML = renderKnowledge();
     if (state.route === "settings") app.innerHTML = renderSettings();
+    restoreFormDrafts();
     window.requestAnimationFrame(hydrateMediaElements);
   }
 
@@ -235,7 +293,8 @@
     const project = session?.project_type || projects[0];
     const movements = Catalog.movementOptions[project] || [];
     const score = (name, value) => `<div class="score-row" data-score-name="${name}">${[1, 2, 3, 4, 5].map((item) => `<button type="button" class="score-btn${Number(value || 3) === item ? " selected" : ""}" data-score="${item}">${item}</button>`).join("")}</div><input type="hidden" name="${name}" value="${Number(value || 3)}">`;
-    return `<form id="workout-form" class="stack">
+    // 修改时间：2026-09-11 10:08:00 +08:00；目的：让新增或编辑训练表单拥有稳定草稿作用域，离开页面后可恢复文本。
+    return `<form id="workout-form" class="stack" data-draft-scope="workout:${escapeHtml(mediaOwner)}">
       <section class="card">
         <div class="card-head"><div><p class="eyebrow">Training log</p><h2>${session ? "编辑训练记录" : "记录一次训练"}</h2></div>${session ? `<button type="button" class="btn ghost" data-action="cancel-workout">取消</button>` : ""}</div>
         <div class="form-grid">
@@ -333,7 +392,7 @@
     const reviews = store.reviews.filter((item) => item.cycle_type === cycle);
     return `<div class="stack review-page">
       <section class="segment"><button data-action="review-cycle" data-cycle="week" class="${cycle === "week" ? "active" : ""}">周复盘</button><button data-action="review-cycle" data-cycle="month" class="${cycle === "month" ? "active" : ""}">月复盘</button></section>
-      <form id="review-form" class="card stack">
+      <form id="review-form" class="card stack" data-draft-scope="review:${cycle}:${escapeHtml(editing?.id || "new")}">
         <div class="card-head"><div><h2>${editing ? "编辑复盘" : "复盘记录"}</h2></div>${editing ? `<button type="button" class="btn ghost" data-action="cancel-review">取消</button>` : ""}</div>
         <input type="hidden" name="cycleType" value="${cycle}">
         <input type="hidden" name="planAdjustments" value="${escapeHtml(editing?.plan_adjustments || "")}" aria-hidden="true">
@@ -388,7 +447,7 @@
     const range = item ? { start: item.start_date, end: item.end_date } : rangeOf(cycle);
     const krs = item?.key_results || [];
     return `<div class="stack"><button class="btn ghost" data-nav="settings">← 返回设置</button>
-      <form id="okr-form" class="card stack">
+      <form id="okr-form" class="card stack" data-draft-scope="okr:${escapeHtml(item?.id || "new")}">
         <div class="card-head"><div><p class="eyebrow">Objectives</p><h2>${item ? "编辑目标" : "新增目标"}</h2></div>${item ? `<button type="button" class="btn ghost" data-action="cancel-okr">取消</button>` : ""}</div>
         <div class="field"><label>周期</label><select class="control" name="cycleType">${optionList(["week", "month", "year"], cycle)}</select></div>
         <div class="form-grid"><div class="field"><label>开始日期</label><input class="control" name="startDate" type="date" value="${range.start}"></div><div class="field"><label>结束日期</label><input class="control" name="endDate" type="date" value="${range.end}"></div></div>
@@ -414,7 +473,7 @@
     const points = store.knowledge_points.filter((point) => !keyword || [point.title, point.category, point.mistake, point.correction, point.notes].some((value) => String(value || "").toLowerCase().includes(keyword)));
     // 修改时间：2026-09-08 09:40:00 +08:00；目的：知识页已是独立顶级页，移除无效的“返回知识”按钮，编辑取消继续由表单内按钮处理。
     return `<div class="stack">
-      <form id="knowledge-form" class="card stack"><div class="card-head"><div><p class="eyebrow">Movement notes</p><h2>${item ? "编辑知识点" : "记录动作纠错"}</h2></div>${item ? `<button type="button" class="btn ghost" data-action="cancel-knowledge">取消</button>` : ""}</div>
+      <form id="knowledge-form" class="card stack" data-draft-scope="knowledge:${escapeHtml(item?.id || "new")}"><div class="card-head"><div><p class="eyebrow">Movement notes</p><h2>${item ? "编辑知识点" : "记录动作纠错"}</h2></div>${item ? `<button type="button" class="btn ghost" data-action="cancel-knowledge">取消</button>` : ""}</div>
         <div class="form-grid"><div class="field"><label>标题</label><input class="control" name="title" maxlength="100" value="${escapeHtml(item?.title || "")}"></div><div class="field"><label>分类</label><input class="control" name="category" maxlength="40" value="${escapeHtml(item?.category || "")}"></div></div>
         <div class="field"><label>常见错误</label><textarea class="control" name="mistake" maxlength="1200">${escapeHtml(item?.mistake || "")}</textarea></div><div class="field"><label>纠正方法</label><textarea class="control" name="correction" maxlength="1200">${escapeHtml(item?.correction || "")}</textarea></div><div class="field"><label>补充笔记</label><textarea class="control" name="notes" maxlength="1200">${escapeHtml(item?.notes || "")}</textarea></div>
         <button class="btn full" type="submit">${item ? "更新知识点" : "保存知识点"}</button>
@@ -459,6 +518,8 @@
   document.querySelector(".header-settings").addEventListener("click", () => navigate("settings"));
 
   app.addEventListener("change", (event) => {
+    // 修改时间：2026-09-11 10:10:00 +08:00；目的：选择日期、下拉项或评分后立即同步到本地草稿，防止离开页面丢失。
+    saveFormDraft(event.target.closest("form[data-draft-scope]"));
     if (event.target.id === "workout-media-input") { addWorkoutMedia(event.target.files); return; }
     if (event.target.id === "body-part") updateProjectFields();
     if (event.target.id === "project") updateMovementFields();
@@ -469,6 +530,8 @@
 
   // 修改时间：2026-09-08 18:20:00 +08:00；目的：知识页搜索框输入时即时按标题、分类和正文关键词筛选。
   app.addEventListener("input", (event) => {
+    // 修改时间：2026-09-11 10:10:00 +08:00；目的：文本输入过程中实时暂存表单内容，页面重绘或路由切换后自动恢复。
+    saveFormDraft(event.target.closest("form[data-draft-scope]"));
     if (event.target.id === "knowledge-search") {
       // 修改时间：2026-09-08 18:45:00 +08:00；目的：搜索重绘后恢复焦点和光标位置，避免连续输入时输入框失焦。
       const cursor = event.target.selectionStart;
@@ -525,6 +588,7 @@
       const row = scoreButton.closest("[data-score-name]");
       row.querySelectorAll(".score-btn").forEach((button) => button.classList.toggle("selected", button === scoreButton));
       row.nextElementSibling.value = scoreButton.dataset.score;
+      saveFormDraft(scoreButton.closest("form[data-draft-scope]"));
       return;
     }
     const action = event.target.closest("[data-action]");
@@ -538,19 +602,19 @@
     if (name === "toggle-review") { state.expandedReviewId = state.expandedReviewId === action.dataset.id ? "" : action.dataset.id; render(); }
     if (name === "toggle-knowledge") { state.expandedKnowledgeId = state.expandedKnowledgeId === action.dataset.id ? "" : action.dataset.id; render(); }
     if (name === "edit-workout") { state.editingWorkout = action.dataset.id; state.workoutMediaOwner = ""; navigate("workout"); }
-    if (name === "cancel-workout") { discardWorkoutDraftMedia().finally(() => { state.editingWorkout = ""; state.workoutMediaOwner = ""; state.workoutMediaDraft = []; render(); }); }
+    if (name === "cancel-workout") { clearFormDraft(action.closest("form[data-draft-scope]")); discardWorkoutDraftMedia().finally(() => { state.editingWorkout = ""; state.workoutMediaOwner = ""; state.workoutMediaDraft = []; render(); }); }
     if (name === "review-cycle") { state.reviewCycle = action.dataset.cycle; state.editingReview = ""; render(); }
     if (name === "edit-review") { state.editingReview = action.dataset.id; render(); }
-    if (name === "cancel-review") { state.editingReview = ""; render(); }
+    if (name === "cancel-review") { clearFormDraft(action.closest("form[data-draft-scope]")); state.editingReview = ""; render(); }
     if (name === "edit-okr") { state.editingOkr = action.dataset.id; state.subroute = "okr"; render(); }
-    if (name === "cancel-okr") { state.editingOkr = ""; render(); }
+    if (name === "cancel-okr") { clearFormDraft(action.closest("form[data-draft-scope]")); state.editingOkr = ""; render(); }
     if (name === "edit-knowledge") { state.editingKnowledge = action.dataset.id; render(); }
-    if (name === "cancel-knowledge") { state.editingKnowledge = ""; render(); }
+    if (name === "cancel-knowledge") { clearFormDraft(action.closest("form[data-draft-scope]")); state.editingKnowledge = ""; render(); }
     if (name === "delete") {
       confirmAction({ title: "删除这条记录？", message: "删除后只能通过之前复制的备份恢复。", onConfirm: async () => {
         const item = (Store.get()[action.dataset.collection] || []).find((entry) => entry.id === action.dataset.id);
         if (action.dataset.collection === "sessions") await Promise.all((item?.media_items || []).map((media) => MediaVault.removeFile(media.storage_key).catch(() => null)));
-        Store.remove(action.dataset.collection, action.dataset.id); render(); showToast("已删除");
+        Store.remove(action.dataset.collection, action.dataset.id); clearAllFormDrafts(); render(); showToast("已删除");
       } });
     }
     if (name === "choose-workout-media") document.getElementById("workout-media-input")?.click();
@@ -560,6 +624,8 @@
     // 修改时间：2026-09-08 10:20:00 +08:00；目的：仅在用户主动操作时检查固定 GitHub 版本清单，下载入口只接受已校验的新版本。
     if (name === "check-update") { checkForUpdate(); return; }
     if (name === "open-update-download") { openVerifiedUpdateDownload(); return; }
+    // 修改时间：2026-09-11 10:12:00 +08:00；目的：用户确认清空本地数据时同步清理所有表单草稿，避免旧文本在新空数据中重新出现。
+    if (name === "reset") clearAllFormDrafts();
     if (name === "toggle-period") {
       const store = Store.get();
       const dates = Array.isArray(store.period_dates) ? store.period_dates.slice() : [];
@@ -621,6 +687,7 @@
     confirmAction({ title: "导入当前文本？", message: "导入会覆盖当前全部数据，请确认已经保留需要的备份。", onConfirm: async () => {
       try {
         const result = await importBackupWithMedia(field.value);
+        clearAllFormDrafts();
         render();
         showToast(result.embedded ? `导入成功，已恢复 ${result.embedded} 个附件` : result.unavailable ? `导入成功，${result.unavailable} 个附件需重新选择` : "导入成功");
       } catch (error) { showToast(error.message || "导入失败"); }
@@ -674,6 +741,8 @@
       media_items: state.workoutMediaDraft, updated_at: new Date().toISOString()
     };
     Store.upsert("sessions", item);
+    // 修改时间：2026-09-11 10:15:00 +08:00；目的：训练成功保存后删除对应草稿，避免下次新增训练带出旧文本。
+    clearFormDraft(form);
     state.editingWorkout = ""; state.workoutMediaOwner = ""; state.workoutMediaDraft = []; state.workoutNewMediaKeys = [];
     state.selectedDate = item.date;
     navigate("records");
@@ -687,7 +756,10 @@
     if (start > end) { showToast("开始日期不能晚于结束日期"); return; }
     const existing = state.editingReview ? Store.get().reviews.find((item) => item.id === state.editingReview) : null;
     const item = { id: existing?.id || Store.id("review"), cycle_type: String(data.get("cycleType")), start_date: start, end_date: end, metrics_json: Store.metrics(start, end), wins: String(data.get("wins") || "").trim(), problems: String(data.get("problems") || "").trim(), insights: String(data.get("insights") || "").trim(), plan_adjustments: String(data.get("planAdjustments") || "").trim(), next_focus: String(data.get("nextFocus") || "").trim() };
-    Store.upsert("reviews", item); state.editingReview = ""; render(); showToast(existing ? "复盘已更新" : "复盘已保存");
+    Store.upsert("reviews", item);
+    // 修改时间：2026-09-11 10:15:00 +08:00；目的：复盘成功保存后清除对应草稿，保持下次复盘表单干净。
+    clearFormDraft(form);
+    state.editingReview = ""; render(); showToast(existing ? "复盘已更新" : "复盘已保存");
   }
 
   function submitOkr(form) {
@@ -697,7 +769,10 @@
     const existing = state.editingOkr ? Store.get().okrs.find((item) => item.id === state.editingOkr) : null;
     const results = [0, 1, 2].map((index) => ({ id: existing?.key_results?.[index]?.id || Store.id("kr"), title: String(data.get(`krTitle${index}`) || "").trim(), current_value: num(data.get(`krCurrent${index}`)), target_value: num(data.get(`krTarget${index}`)), unit: String(data.get(`krUnit${index}`) || "").trim() })).filter((item) => item.title || item.target_value != null);
     const item = { id: existing?.id || Store.id("okr"), cycle_type: String(data.get("cycleType")), objective, status: "active", start_date: String(data.get("startDate")), end_date: String(data.get("endDate")), key_results: results };
-    Store.upsert("okrs", item); state.editingOkr = ""; render(); showToast(existing ? "目标已更新" : "目标已保存");
+    Store.upsert("okrs", item);
+    // 修改时间：2026-09-11 10:15:00 +08:00；目的：目标成功保存后清除对应草稿，避免目标管理页残留旧输入。
+    clearFormDraft(form);
+    state.editingOkr = ""; render(); showToast(existing ? "目标已更新" : "目标已保存");
   }
 
   function submitKnowledge(form) {
@@ -707,7 +782,10 @@
     if (!titleValue && !mistake) { showToast("请先写一个知识点"); return; }
     const existing = state.editingKnowledge ? Store.get().knowledge_points.find((item) => item.id === state.editingKnowledge) : null;
     const item = { id: existing?.id || Store.id("knowledge"), title: titleValue, category: String(data.get("category") || "").trim(), mistake, correction: String(data.get("correction") || "").trim(), notes: String(data.get("notes") || "").trim(), updated_at: new Date().toISOString() };
-    Store.upsert("knowledge_points", item); state.editingKnowledge = ""; render(); showToast(existing ? "知识点已更新" : "知识点已保存");
+    Store.upsert("knowledge_points", item);
+    // 修改时间：2026-09-11 10:15:00 +08:00；目的：知识点成功保存后清除对应草稿，避免重新进入时重复出现已提交文本。
+    clearFormDraft(form);
+    state.editingKnowledge = ""; render(); showToast(existing ? "知识点已更新" : "知识点已保存");
   }
 
   // 修改时间：2026-09-07 18:42:00 +08:00；目的：启动封面可轻触跳过，并在短暂展示后自动淡出，避免阻塞离线训练数据的正常使用。
